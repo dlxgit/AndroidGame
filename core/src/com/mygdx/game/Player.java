@@ -58,5 +58,4 @@ public class Player extends Actor {
         updatePosition(touchPad);
         rotate(touchPad.getTouchpad());
     }
-
 }

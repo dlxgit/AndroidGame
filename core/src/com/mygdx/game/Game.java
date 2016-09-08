@@ -3,7 +3,6 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,8 +12,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.StretchViewport;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Vector;
+import java.util.Random;
 
 public class Game extends ApplicationAdapter {
 	private OrthographicCamera camera;
@@ -28,14 +27,21 @@ public class Game extends ApplicationAdapter {
 	FireButton fireButton;
 	Player player;
 
-	Vector<Shot> shotList;
+	Vector<Bullet> bulletList;
 
 	InputMultiplexer multiplexer;
 
+	float gameTime;
+	int enemyCount;
+	Random rnd;
 
 	@Override
 	public void create () {
-		shotList = new Vector<Shot>();
+
+		gameTime = 0;
+		enemyCount = 0;
+
+		bulletList = new Vector<Bullet>();
 
 		camera = new OrthographicCamera();
 		float aspectRatio = (float) Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
@@ -61,6 +67,8 @@ public class Game extends ApplicationAdapter {
 		multiplexer.addProcessor(inputController);
 		//Gdx.input.setInputProcessor(stage);
 		Gdx.input.setInputProcessor(multiplexer);
+
+
 	}
 
 	@Override
@@ -91,16 +99,28 @@ public class Game extends ApplicationAdapter {
 	public void update(){
 		//System.out.println(touchPad.getDeltaDistance().x);
 		//System.out.print(touchPad.getDeltaDistance().y);
-
+		gameTime += Gdx.graphics.getDeltaTime();
+		System.out.println(gameTime);
 		player.update(touchPad);
 		fireButton.update();
 		updateFireButtonState();
 
+
+		if((gameTime / 4) > enemyCount ){
+
+			stage.addActor(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1)), enemyCount ));
+			enemyCount++;
+
+		}
+
 		if(fireButton.isPressed()){
 			System.out.println("NEW BULLET!@@@@@@@@@@@@@@@@@@@@@@@");
-			shotList.add(new Shot(new Vector2(player.sprite.getX(), player.sprite.getY()), player.sprite.getRotation()));
+
+			stage.addActor(new Bullet(new Vector2(player.sprite.getX(), player.sprite.getY()), player.sprite.getRotation()));
+
+			//bulletList.add(new Bullet(new Vector2(player.sprite.getX(), player.sprite.getY()), player.sprite.getRotation()));
 		}
-		updateBullets();
+		//updateBullets();
 	}
 
 	public void updateFireButtonState(){
@@ -111,20 +131,21 @@ public class Game extends ApplicationAdapter {
 		else fireButton.isPressed = false;
 	}
 
-
+/*
 	public void updateBullets(){
-		for (Iterator<Shot> it = shotList.iterator(); it.hasNext();){
-			Shot shot = it.next();
-			shot.update();
-			if(shot.livingTime > shot.maxLivingTime){
+		for (Iterator<Bullet> it = bulletList.iterator(); it.hasNext();){
+			Bullet bullet = it.next();
+			//bullet.update();
+			if(bullet.livingTime > bullet.MAX_LIVING_TIME){
 				it.remove();
 			}
 		}
 	}
+*/
 
 	public void renderBullets(){
-		for(Shot shot : shotList){
-			shot.sprite.draw(batch);
+		for(Bullet bullet : bulletList){
+			bullet.sprite.draw(batch);
 		}
 	}
 }

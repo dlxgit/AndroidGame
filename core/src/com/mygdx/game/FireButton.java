@@ -50,7 +50,7 @@ public class FireButton extends Actor {
         if(sprite.getBoundingRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight()- Gdx.input.getY())){
             //System.out.println("CONTAINS!!!!!!!!!!!!!!!!!");
 
-            //isPressed = true;
+            isPressed = true;
         }
         //else isPressed = false;
     }
