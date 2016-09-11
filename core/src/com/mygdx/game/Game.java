@@ -16,6 +16,16 @@ import java.util.Vector;
 import java.util.Random;
 
 public class Game extends ApplicationAdapter {
+	enum State{
+		MENU,
+		START,
+		PLAY,
+		PAUSE,
+		END
+	}
+
+	State state;
+
 	private OrthographicCamera camera;
 	private Stage stage;
 	SpriteBatch batch;
@@ -27,13 +37,14 @@ public class Game extends ApplicationAdapter {
 	FireButton fireButton;
 	Player player;
 
-	Vector<Bullet> bulletList;
-
 	InputMultiplexer multiplexer;
 
 	float gameTime;
 	int enemyCount;
 	Random rnd;
+
+	Vector<Enemy> enemyList;
+	Vector<Bullet> bulletList;
 
 	@Override
 	public void create () {
@@ -42,6 +53,7 @@ public class Game extends ApplicationAdapter {
 		enemyCount = 0;
 
 		bulletList = new Vector<Bullet>();
+		enemyList = new Vector<Enemy>();
 
 		camera = new OrthographicCamera();
 		float aspectRatio = (float) Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
@@ -58,8 +70,6 @@ public class Game extends ApplicationAdapter {
 
 		stage = new Stage(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		stage.addActor(touchPad.getTouchpad());
-		stage.addActor(player);
-		stage.addActor(fireButton);
 
 		inputController = new InputController();
 		multiplexer = new InputMultiplexer();
@@ -68,7 +78,7 @@ public class Game extends ApplicationAdapter {
 		//Gdx.input.setInputProcessor(stage);
 		Gdx.input.setInputProcessor(multiplexer);
 
-
+		rnd = new Random();
 	}
 
 	@Override
@@ -77,16 +87,18 @@ public class Game extends ApplicationAdapter {
 		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 		camera.update();
 		this.update();
-		//batch.begin();
+
+		batch.begin();
 		//batch.draw(img, 0, 0);
-		//touchPad.render();
+		touchPad.render();
 
 		stage.act(Gdx.graphics.getDeltaTime());
+		player.render(batch);
+		renderBullets();
+		renderEnemies();
+		fireButton.render(batch);
 
-		//player.render(batch);
-		//renderBullets();
-		//fireButton.render(batch);
-		//batch.end();
+		batch.end();
 		stage.draw();
 	}
 
@@ -106,21 +118,20 @@ public class Game extends ApplicationAdapter {
 		updateFireButtonState();
 
 
-		if((gameTime / 4) > enemyCount ){
+		if((gameTime / 6) > enemyCount ){
 
-			stage.addActor(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1)), enemyCount ));
+			enemyList.add(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1)), enemyCount));
 			enemyCount++;
 
 		}
 
 		if(fireButton.isPressed()){
 			System.out.println("NEW BULLET!@@@@@@@@@@@@@@@@@@@@@@@");
+			bulletList.add(new Bullet(new Vector2(player.sprite.getX(), player.sprite.getY()), player.sprite.getRotation()));
 
-			stage.addActor(new Bullet(new Vector2(player.sprite.getX(), player.sprite.getY()), player.sprite.getRotation()));
-
-			//bulletList.add(new Bullet(new Vector2(player.sprite.getX(), player.sprite.getY()), player.sprite.getRotation()));
 		}
-		//updateBullets();
+		updateBullets();
+		updateEnemies();
 	}
 
 	public void updateFireButtonState(){
@@ -131,21 +142,37 @@ public class Game extends ApplicationAdapter {
 		else fireButton.isPressed = false;
 	}
 
-/*
+
 	public void updateBullets(){
 		for (Iterator<Bullet> it = bulletList.iterator(); it.hasNext();){
 			Bullet bullet = it.next();
-			//bullet.update();
-			if(bullet.livingTime > bullet.MAX_LIVING_TIME){
+			bullet.update();
+			if(bullet.livingTime > bullet.MAX_LIVING_TIME || bullet.intersects(enemyList)){
 				it.remove();
 			}
 		}
 	}
-*/
+
+	public void updateEnemies(){
+		for (Iterator<Enemy> it = enemyList.iterator(); it.hasNext();){
+			Enemy enemy = it.next();
+			enemy.update();
+			if(enemy.state == Enemy.State.DAMAGED){
+				it.remove();
+			}
+		}
+	}
+
 
 	public void renderBullets(){
 		for(Bullet bullet : bulletList){
 			bullet.sprite.draw(batch);
+		}
+	}
+
+	public void renderEnemies(){
+		for(Enemy enemy : enemyList){
+			enemy.sprite.draw(batch);
 		}
 	}
 }

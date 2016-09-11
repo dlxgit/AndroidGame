@@ -5,14 +5,25 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 
 /**
  * Created by Andrey on 06.09.2016.
  */
-public class Enemy extends Actor {
-    public static final float moveSpeed = 5.f;
+public class Enemy {
+    enum State{
+        INIT,
+        MOVE,
+        STAY,
+        ATTACK,
+        DAMAGED,
+        CAST,
+        DEAD
+    }
 
+    Direction direction;
+    State state;
+    public static final float moveSpeed = 5.f;
+    //public static final float MAX_LIVING_TIME = 5.f;
     Texture texture;
     Sprite sprite;
     float livingTime;
@@ -27,7 +38,6 @@ public class Enemy extends Actor {
         livingTime = 0;
         //pos = new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sprite.setPosition(position.x, position.y);
-        setBounds(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
         health = 100;
     }
 
@@ -36,19 +46,16 @@ public class Enemy extends Actor {
                 (float) (sprite.getY() + (moveSpeed * Math.sin((rotationAngle) * Math.PI / 180))));
     }
 
-    @Override
-    public void act(float delta) {
+    public void update() {
         this.livingTime += Gdx.graphics.getDeltaTime();
 
         if (health <= 0) {
             System.out.println("destroy bullet");
-            this.remove();
         }
-        //updatePosition();
+        updatePosition();
     }
 
-    @Override
-    public void draw(Batch batch, float alpha){
+    public void draw(Batch batch){
         //batch.draw(texture,actorX,actorY);
         sprite.draw(batch);
     }

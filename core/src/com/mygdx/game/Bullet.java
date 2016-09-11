@@ -7,10 +7,19 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
+import java.util.Iterator;
+import java.util.Vector;
+
 /**
  * Created by Andrey on 31.08.2016.
  */
-public class Bullet extends Actor {
+public class Bullet {
+    enum State{
+        INIT,
+        MOVE,
+        EXPLODE
+    }
+
     public static final float MAX_LIVING_TIME = 3.f;
     public static final float moveSpeed = 5.f;
 
@@ -35,19 +44,26 @@ public class Bullet extends Actor {
                            (float)(sprite.getY() + (moveSpeed * Math.sin((rotationAngle)* Math.PI / 180))));
     }
 
-    @Override
-    public void act(float delta){
+    public void update(){
         this.livingTime += Gdx.graphics.getDeltaTime();
 
         if(livingTime > MAX_LIVING_TIME){
             System.out.println("destroy bullet");
-            this.remove();
         }
         updatePosition();
     }
 
-    @Override
-    public void draw(Batch batch, float alpha){
+    public boolean intersects(Vector<Enemy> enemyList){
+        for (Enemy enemy : enemyList){
+            if(sprite.getBoundingRectangle().overlaps(enemy.sprite.getBoundingRectangle())){
+                enemy.state = Enemy.State.DAMAGED;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
         sprite.draw(batch);
     }

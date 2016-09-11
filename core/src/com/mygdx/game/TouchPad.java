@@ -56,8 +56,6 @@ public class TouchPad implements ApplicationListener {
         touchpad.setBounds(15, 15, 200, 200);
 
         //Create a Stage and add TouchPad
-
-
         //Create block sprite
         blockTexture = new Texture(Gdx.files.internal("images/block.png"));
         blockSprite = new Sprite(blockTexture);
@@ -78,18 +76,10 @@ public class TouchPad implements ApplicationListener {
     }
 
     public void render(SpriteBatch batch) {
-        Gdx.gl.glClearColor(0.294f, 0.294f, 0.294f, 1f);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-
         //Move blockSprite with TouchPad
         blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX() * blockSpeed);
         blockSprite.setY(blockSprite.getY() + touchpad.getKnobPercentY() * blockSpeed);
-
-        //Draw
-        batch.begin();
         blockSprite.draw(batch);
-        batch.end();
     }
 
     public Touchpad getTouchpad(){

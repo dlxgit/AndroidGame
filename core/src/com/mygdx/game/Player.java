@@ -13,6 +13,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
  * Created by Andrey on 29.08.2016.
  */
 public class Player extends Actor {
+    enum State{
+        INIT,
+        MOVE,
+        MOVE_FAST,
+        STAY,
+        SHOOT,
+        DAMAGED,
+        PICKUP,
+        DEAD
+    }
+
     public static final Vector2 startPos = new Vector2(300, 300);
     public static final int defaultMoveSpeed = 5;
 
@@ -33,8 +44,7 @@ public class Player extends Actor {
         moveSpeed = defaultMoveSpeed;
     }
 
-    @Override
-    public void draw(Batch batch, float alpha){
+    public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
         sprite.draw(batch);
     }
@@ -52,7 +62,6 @@ public class Player extends Actor {
             sprite.setRotation(angle);
         }
     }
-
 
     public void update(TouchPad touchPad){
         updatePosition(touchPad);

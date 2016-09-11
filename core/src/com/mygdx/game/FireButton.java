@@ -11,7 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 /**
  * Created by Andrey on 31.08.2016.
  */
-public class FireButton extends Actor {
+public class FireButton {
     public static final Vector2 pos = new Vector2(1000, 50);
     Texture texture;
     Sprite sprite;
@@ -21,13 +21,11 @@ public class FireButton extends Actor {
         texture = new Texture(Gdx.files.internal("images/shootButton.png"));
         sprite = new Sprite(texture);
         sprite.setPosition(pos.x, pos.y);
-        setBounds(sprite.getX(),sprite.getY(),sprite.getWidth(),sprite.getHeight());
         isPressed = false;
 
     }
 
-    @Override
-    public void draw(Batch batch, float alpha){
+    public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
         sprite.draw(batch);
     }
