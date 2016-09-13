@@ -17,17 +17,17 @@ public class FireButton {
     Sprite sprite;
     boolean isPressed;
 
-    public  FireButton(){
-        texture = new Texture(Gdx.files.internal("images/shootButton.png"));
+    public  FireButton(Assets assets){
+        //texture = new Texture(Gdx.files.internal("images/shootButton.png"));
+        texture = assets.manager.get(assets.fireButtonTextureName);
         sprite = new Sprite(texture);
         sprite.setPosition(pos.x, pos.y);
         isPressed = false;
-
     }
 
     public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
-        sprite.draw(batch);
+        //sprite.draw(batch);
     }
 
     private void updatePressState(){

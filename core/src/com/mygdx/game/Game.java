@@ -24,6 +24,7 @@ public class Game extends ApplicationAdapter {
 		END
 	}
 
+	Assets assets;
 	State state;
 
 	private OrthographicCamera camera;
@@ -49,6 +50,8 @@ public class Game extends ApplicationAdapter {
 	@Override
 	public void create () {
 
+		assets = new Assets();
+
 		gameTime = 0;
 		enemyCount = 0;
 
@@ -63,10 +66,9 @@ public class Game extends ApplicationAdapter {
 		img = new Texture("badlogic.jpg");
 		touchPad = new TouchPad();
 		touchPad.create();
-		player = new Player();
-		player.create();
+		player = new Player(assets);
 
-		fireButton = new FireButton();
+		fireButton = new FireButton(assets);
 
 		stage = new Stage(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 		stage.addActor(touchPad.getTouchpad());
@@ -94,10 +96,9 @@ public class Game extends ApplicationAdapter {
 
 		stage.act(Gdx.graphics.getDeltaTime());
 		player.render(batch);
-		renderBullets();
-		renderEnemies();
-		fireButton.render(batch);
-
+		//renderBullets();
+		//renderEnemies();
+		//fireButton.render(batch);
 		batch.end();
 		stage.draw();
 	}
@@ -113,6 +114,7 @@ public class Game extends ApplicationAdapter {
 		//System.out.print(touchPad.getDeltaDistance().y);
 		gameTime += Gdx.graphics.getDeltaTime();
 		System.out.println(gameTime);
+		System.out.println(player.direction.toString());
 		player.update(touchPad);
 		fireButton.update();
 		updateFireButtonState();
@@ -120,8 +122,8 @@ public class Game extends ApplicationAdapter {
 
 		if((gameTime / 6) > enemyCount ){
 
-			enemyList.add(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1)), enemyCount));
-			enemyCount++;
+			//enemyList.add(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1)), enemyCount));
+			//enemyCount++;
 
 		}
 

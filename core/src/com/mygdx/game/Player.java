@@ -12,7 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 /**
  * Created by Andrey on 29.08.2016.
  */
-public class Player extends Actor {
+public class Player{
     enum State{
         INIT,
         MOVE,
@@ -21,9 +21,11 @@ public class Player extends Actor {
         SHOOT,
         DAMAGED,
         PICKUP,
+        RELOAD,
         DEAD
     }
 
+    PlayerAnimation animation;
     public static final Vector2 startPos = new Vector2(300, 300);
     public static final int defaultMoveSpeed = 5;
 
@@ -31,14 +33,23 @@ public class Player extends Actor {
     Sprite sprite;
     Texture texture;
     int health;
+    int slotNo;
+    int nSlots;
     int moveSpeed;
+    float currentFrame;
+    Direction direction;
+    Direction lastDirection;
+    State state;
 
+    public Player(Assets assets){
+        state = State.MOVE;
+        direction = Direction.DOWN;
+        lastDirection = Direction.DOWN;
 
-
-    public void create(){
         health = 100;
         pos = new Vector2(startPos);
-        texture = new Texture(Gdx.files.internal("images/ship.png"));
+        texture = assets.manager.get(assets.heroTextureName);
+        animation = new PlayerAnimation(texture);
         sprite = new Sprite(texture);
         sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2, Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2);
         moveSpeed = defaultMoveSpeed;
@@ -46,7 +57,9 @@ public class Player extends Actor {
 
     public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
-        sprite.draw(batch);
+        //sprite.draw(batch);
+        animation.play(state, direction);
+        batch.draw(animation.getCurrentFrame(), sprite.getX(), sprite.getY());
     }
         //sprite.draw(batch);
 
@@ -55,16 +68,35 @@ public class Player extends Actor {
         sprite.setPosition(sprite.getX() + touchPad.getDeltaDistance().x * moveSpeed, sprite.getY() + touchPad.getDeltaDistance().y * moveSpeed);
     }
 
-    public void rotate(Touchpad touchpad){
+    public void updateDirection(Touchpad touchpad) {
         Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
         float angle = v.angle();
-        if(v.x != 0 && v.y != 0) {
+        int nAngle = (int) ((angle + 45) / 90);
+        System.out.println(nAngle);
+        switch(nAngle){
+            case 0:
+                direction = Direction.RIGHT;
+                break;
+            case 1:
+                direction = Direction.UP;
+                break;
+            case 2:
+                direction = Direction.LEFT;
+                break;
+            case 3:
+                direction = Direction.DOWN;
+                break;
+        }
+
+        if (v.x != 0 && v.y != 0) {
             sprite.setRotation(angle);
         }
     }
 
     public void update(TouchPad touchPad){
         updatePosition(touchPad);
-        rotate(touchPad.getTouchpad());
+        updateDirection(touchPad.getTouchpad());
+        animation.update(state, direction);
+
     }
 }
