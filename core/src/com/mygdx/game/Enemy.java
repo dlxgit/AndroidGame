@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 /**
@@ -11,7 +12,7 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class Enemy {
     enum State{
-        INIT,
+        SPAWN,
         MOVE,
         STAY,
         ATTACK,
@@ -19,6 +20,8 @@ public class Enemy {
         CAST,
         DEAD
     }
+
+    public final float VISION_DISTANCE = 300.f;
 
     Direction direction;
     State state;
@@ -29,12 +32,18 @@ public class Enemy {
     float livingTime;
     //Vector2 pos;
     float rotationAngle;
+
+    EnemyAnimation animation;
+    Rectangle rectangle;
+
     int health;
 
 
     public Enemy(Vector2 position, int enemyCount){
-        texture = new Texture(Gdx.files.internal("images/zloyvrag.png"));
+        texture = new Texture(Gdx.files.internal("images/zombie.png"));
         sprite = new Sprite(texture);
+        animation = new EnemyAnimation(texture);
+        state = State.SPAWN;
         livingTime = 0;
         //pos = new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sprite.setPosition(position.x, position.y);
@@ -53,10 +62,68 @@ public class Enemy {
             System.out.println("destroy bullet");
         }
         updatePosition();
+        animation.update(state, direction);
     }
 
     public void draw(Batch batch){
         //batch.draw(texture,actorX,actorY);
-        sprite.draw(batch);
+
+        //sprite.draw(batch);
+        animation.play(state, direction);
+        batch.draw(animation.getCurrentFrame(),  sprite.getX(), sprite.getY());
     }
+
+    private boolean isNearPlayer(Rectangle playerRect){
+        if(Math.abs(playerRect.x - rectangle.x) < VISION_DISTANCE && Math.abs(playerRect.y - rectangle.y) < VISION_DISTANCE) {
+            return true;
+        }
+        return false;
+    }
+
+    private void follow(Rectangle playerRect){
+
+    }
+
+    void ComputeEnemyDirection(Rectangle playerRect)
+    {
+        //compute distance and dir
+        Vector2 distance = new Vector2( Math.abs(playerRect.x - rectangle.x),
+                                        Math.abs(playerRect.y - rectangle.y));
+        if (distance.x > 5 || distance.y > 5)
+        {
+            //TODO: check left-right dir zombie sprite bug (almost)
+            if ((distance.x > 3 && distance.y > 3) && (distance.x / distance.y > 0.9) && (distance.y / distance.x < 1.1))
+            {
+                if (playerRect.x >= rectangle.x && playerRect.y >= rectangle.y)
+                    direction = Direction.DOWNRIGHT;
+                else if (playerRect.x >= rectangle.x && playerRect.y < rectangle.y)
+                    direction = Direction.UPRIGHT;
+                else if (playerRect.x < rectangle.x && playerRect.y >= rectangle.y)
+                    direction = Direction.DOWNLEFT;
+                else if (playerRect.x < rectangle.x && playerRect.y < rectangle.y)
+                    direction = Direction.UPLEFT;
+            }
+            else if (distance.x >= distance.y)
+            {
+                if (playerRect.x > rectangle.x)
+                    direction = Direction.RIGHT;
+                else
+                    direction = Direction.LEFT;
+            }
+            else if (distance.x < distance.y)
+            {
+                if (playerRect.y > rectangle.y)
+                    direction = Direction.DOWN;
+                else
+                    direction = Direction.UP;
+            }
+        }
+    }
+
+    private void move(){
+        switch(direction){
+
+        }
+    }
+
 }

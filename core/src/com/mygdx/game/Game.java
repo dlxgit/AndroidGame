@@ -38,6 +38,7 @@ public class Game extends ApplicationAdapter {
 	FireButton fireButton;
 	Player player;
 
+
 	InputMultiplexer multiplexer;
 
 	float gameTime;
@@ -46,6 +47,7 @@ public class Game extends ApplicationAdapter {
 
 	Vector<Enemy> enemyList;
 	Vector<Bullet> bulletList;
+	TileMap map;
 
 	@Override
 	public void create () {
@@ -64,6 +66,7 @@ public class Game extends ApplicationAdapter {
 		camera.setToOrtho(true, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 		batch = new SpriteBatch();
 		img = new Texture("badlogic.jpg");
+		map = new TileMap(assets, camera, 0);
 		touchPad = new TouchPad();
 		touchPad.create();
 		player = new Player(assets);
@@ -81,6 +84,7 @@ public class Game extends ApplicationAdapter {
 		Gdx.input.setInputProcessor(multiplexer);
 
 		rnd = new Random();
+
 	}
 
 	@Override
@@ -92,13 +96,14 @@ public class Game extends ApplicationAdapter {
 
 		batch.begin();
 		//batch.draw(img, 0, 0);
+		map.render(batch);
 		touchPad.render();
 
 		stage.act(Gdx.graphics.getDeltaTime());
 		player.render(batch);
-		//renderBullets();
-		//renderEnemies();
-		//fireButton.render(batch);
+		renderEnemies();
+		renderBullets();
+		fireButton.render(batch);
 		batch.end();
 		stage.draw();
 	}
@@ -113,8 +118,9 @@ public class Game extends ApplicationAdapter {
 		//System.out.println(touchPad.getDeltaDistance().x);
 		//System.out.print(touchPad.getDeltaDistance().y);
 		gameTime += Gdx.graphics.getDeltaTime();
-		System.out.println(gameTime);
-		System.out.println(player.direction.toString());
+		System.out.println("gameTime ");
+		System.out.print(gameTime);
+		//System.out.println(player.direction.toString());
 		player.update(touchPad);
 		fireButton.update();
 		updateFireButtonState();
@@ -122,8 +128,9 @@ public class Game extends ApplicationAdapter {
 
 		if((gameTime / 6) > enemyCount ){
 
-			//enemyList.add(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1)), enemyCount));
-			//enemyCount++;
+			enemyList.add(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1)), enemyCount));
+			System.out.println("SPAWN!NEW");
+			enemyCount++;
 
 		}
 
@@ -174,7 +181,9 @@ public class Game extends ApplicationAdapter {
 
 	public void renderEnemies(){
 		for(Enemy enemy : enemyList){
-			enemy.sprite.draw(batch);
+			//enemy.sprite.draw(batch);
+			enemy.animation.play(enemy.state, enemy.direction);
+			enemy.draw(batch);
 		}
 	}
 }

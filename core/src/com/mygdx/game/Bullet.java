@@ -30,7 +30,7 @@ public class Bullet {
     float rotationAngle;
 
     public Bullet(Vector2 pos, float rotationAngle){
-        texture = new Texture(Gdx.files.internal("images/shot.png"));
+        texture = new Texture(Gdx.files.internal("images/bullet.png"));
         this.pos = pos;
         this.rotationAngle = rotationAngle;
         sprite = new Sprite(texture);

@@ -72,7 +72,7 @@ public class Player{
         Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
         float angle = v.angle();
         int nAngle = (int) ((angle + 45) / 90);
-        System.out.println(nAngle);
+        //System.out.println(nAngle);
         switch(nAngle){
             case 0:
                 direction = Direction.RIGHT;

@@ -27,10 +27,11 @@ public class FireButton {
 
     public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
-        //sprite.draw(batch);
+        sprite.draw(batch);
     }
 
     private void updatePressState(){
+        /*
         System.out.print(sprite.getBoundingRectangle().getX());
         System.out.print(" ");
         System.out.print(sprite.getBoundingRectangle().getY());
@@ -39,18 +40,19 @@ public class FireButton {
         System.out.print(" ");
         System.out.print(sprite.getBoundingRectangle().getHeight());
         System.out.println(" Button");
-
-
+*/
+/*
         System.out.print(Gdx.input.getX());
         System.out.print(" ");
         System.out.print(Gdx.input.getY());
         System.out.println(" Press");
+        */
         if(sprite.getBoundingRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight()- Gdx.input.getY())){
-            //System.out.println("CONTAINS!!!!!!!!!!!!!!!!!");
+            System.out.println("CONTAINS!!!!!!!!!!!!!!!!!");
 
             isPressed = true;
         }
-        //else isPressed = false;
+        else isPressed = false;
     }
 
     public boolean isPressed(){
