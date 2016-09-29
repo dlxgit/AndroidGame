@@ -8,52 +8,88 @@ import com.badlogic.gdx.math.Vector2;
  */
 public class Entity {
     float health;
-    Vector2 position;
     Rectangle rectangle;
-    float speed;
+    float moveSpeed;
     float diagonal_speed;
-    Direction dir;
+    Direction direction;
 
-    public Rectangle MoveRectangle()
+    public Rectangle moveRectangle()
     {
-        Vector2 pos = new Vector2();
-        rectangle.getPosition(pos);
-        switch (dir)
+        switch (direction)
         {
             case UP:
-                pos.y -= speed;
+                rectangle.y -= moveSpeed;
                 break;
             case UPRIGHT:
-                pos.x += (diagonal_speed * speed);
-                pos.y -= (diagonal_speed * speed);
+                rectangle.x += (diagonal_speed * moveSpeed);
+                rectangle.y -= (diagonal_speed * moveSpeed);
                 break;
             case RIGHT:
-                pos.x += speed;
+                rectangle.x += moveSpeed;
                 break;
             case DOWNRIGHT:
-                pos.x += (diagonal_speed * speed);
-                pos.y += (diagonal_speed * speed);
+                rectangle.x += (diagonal_speed * moveSpeed);
+                rectangle.y += (diagonal_speed * moveSpeed);
                 break;
             case DOWN:
-                pos.y += speed;
+                rectangle.y += moveSpeed;
                 break;
             case DOWNLEFT:
-                pos.x -= (diagonal_speed * speed);
-                pos.y += (diagonal_speed * speed);
+                rectangle.x -= (diagonal_speed * moveSpeed);
+                rectangle.y += (diagonal_speed * moveSpeed);
                 break;
             case LEFT:
-                pos.x -= speed;
+                rectangle.x -= moveSpeed;
                 break;
             case UPLEFT:
-                pos.x -= (diagonal_speed * speed);
-                pos.y -= (diagonal_speed * speed);
+                rectangle.x -= (diagonal_speed * moveSpeed);
+                rectangle.y -= (diagonal_speed * moveSpeed);
                 break;
             case NONE:
                 break;
             default:
                 break;
         }
-        rectangle.setPosition(pos);
+        return rectangle;
+    }
+
+    public Rectangle moveRectangle(Direction lastDirection)
+    {
+        switch (lastDirection)
+        {
+            case UP:
+                rectangle.y -= moveSpeed;
+                break;
+            case UPRIGHT:
+                rectangle.x += (diagonal_speed * moveSpeed);
+                rectangle.y -= (diagonal_speed * moveSpeed);
+                break;
+            case RIGHT:
+                rectangle.x += moveSpeed;
+                break;
+            case DOWNRIGHT:
+                rectangle.x += (diagonal_speed * moveSpeed);
+                rectangle.y += (diagonal_speed * moveSpeed);
+                break;
+            case DOWN:
+                rectangle.y += moveSpeed;
+                break;
+            case DOWNLEFT:
+                rectangle.x -= (diagonal_speed * moveSpeed);
+                rectangle.y += (diagonal_speed * moveSpeed);
+                break;
+            case LEFT:
+                rectangle.x -= moveSpeed;
+                break;
+            case UPLEFT:
+                rectangle.x -= (diagonal_speed * moveSpeed);
+                rectangle.y -= (diagonal_speed * moveSpeed);
+                break;
+            case NONE:
+                break;
+            default:
+                break;
+        }
         return rectangle;
     }
 

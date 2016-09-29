@@ -10,7 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 /**
  * Created by Andrey on 06.09.2016.
  */
-public class Enemy {
+public class Enemy extends Entity {
     enum State{
         SPAWN,
         MOVE,
@@ -23,25 +23,22 @@ public class Enemy {
 
     public final float VISION_DISTANCE = 300.f;
 
-    Direction direction;
     State state;
     public static final float moveSpeed = 5.f;
     //public static final float MAX_LIVING_TIME = 5.f;
     Texture texture;
     Sprite sprite;
     float livingTime;
-    //Vector2 pos;
     float rotationAngle;
 
     EnemyAnimation animation;
-    Rectangle rectangle;
-
-    int health;
 
 
-    public Enemy(Vector2 position, int enemyCount){
+
+    public Enemy(Vector2 position){
         texture = new Texture(Gdx.files.internal("images/zombie.png"));
         sprite = new Sprite(texture);
+        rectangle = new Rectangle(position.x, position.y, 250,37);
         animation = new EnemyAnimation(texture);
         state = State.SPAWN;
         livingTime = 0;
@@ -51,26 +48,29 @@ public class Enemy {
     }
 
     private void updatePosition(){
-        sprite.setPosition((float) (sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
-                (float) (sprite.getY() + (moveSpeed * Math.sin((rotationAngle) * Math.PI / 180))));
+        //sprite.setPosition((float) (sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
+        //        (float) (sprite.getY() + (moveSpeed * Math.sin((rotationAngle) * Math.PI / 180))));
+        //rectangle.setPosition(rectangle.x + touchPad.getDeltaDistance().x * moveSpeed, rectangle.y + touchPad.getDeltaDistance().y * moveSpeed);
+        moveRectangle();
     }
 
-    public void update() {
+    public void update(Rectangle playerRect) {
         this.livingTime += Gdx.graphics.getDeltaTime();
 
         if (health <= 0) {
             System.out.println("destroy bullet");
         }
+
+        calculateEnemyDirection(playerRect);
         updatePosition();
         animation.update(state, direction);
     }
 
-    public void draw(Batch batch){
+    public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
-
         //sprite.draw(batch);
         animation.play(state, direction);
-        batch.draw(animation.getCurrentFrame(),  sprite.getX(), sprite.getY());
+        batch.draw(animation.getCurrentFrame(),  rectangle.x, rectangle.y);
     }
 
     private boolean isNearPlayer(Rectangle playerRect){
@@ -84,14 +84,18 @@ public class Enemy {
 
     }
 
-    void ComputeEnemyDirection(Rectangle playerRect)
+    void calculateEnemyDirection(Rectangle playerRect)
     {
-        //compute distance and dir
+        //calculate distance and direction
         Vector2 distance = new Vector2( Math.abs(playerRect.x - rectangle.x),
                                         Math.abs(playerRect.y - rectangle.y));
-        if (distance.x > 5 || distance.y > 5)
+        if (distance.x < 5 && distance.y < 5)
         {
-            //TODO: check left-right dir zombie sprite bug (almost)
+            direction = Direction.NONE;
+        }
+        else
+        {
+            //TODO: check left-right direction zombie sprite bug (almost)
             if ((distance.x > 3 && distance.y > 3) && (distance.x / distance.y > 0.9) && (distance.y / distance.x < 1.1))
             {
                 if (playerRect.x >= rectangle.x && playerRect.y >= rectangle.y)

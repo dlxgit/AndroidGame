@@ -48,7 +48,7 @@ public class EnemyAnimation {
         }
 
         if (state == Enemy.State.MOVE) {
-            System.out.println("MOVEEEEEE");
+            //System.out.println("MOVEEEEEE");
             switch(direction) {
                 case UP:
                     currentFrame = moveUpAnimation.getKeyFrame(stateTime, true);

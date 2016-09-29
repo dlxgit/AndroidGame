@@ -8,10 +8,8 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class InputController implements InputProcessor {
-
     Vector2 mousePos;
     boolean isTouched;
-
 
     @Override
     public boolean keyDown(int keycode) {

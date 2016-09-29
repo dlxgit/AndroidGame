@@ -61,29 +61,54 @@ public class PlayerAnimation {
         return currentFrame;
     }
 
-    public void play(Player.State playerState, Direction playerDirection) {
-        if (playerState == Player.State.DAMAGED) {
-            currentFrame = damagedAnimation.getKeyFrame(stateTime, true);
-            return;
+    public void play(Player.State playerState, Direction playerLastDirection) {
+        switch (playerState) {
+            case DAMAGED:
+                currentFrame = damagedAnimation.getKeyFrame(stateTime, true);
+                break;
+            case MOVE:
+                //System.out.println("MOVEEEEEE");
+                setCurrentFrame(playerLastDirection, stateTime);
+                break;
+            case STAY:
+                setCurrentFrame(playerLastDirection, 0);
+                break;
         }
+    }
 
-        if (playerState == Player.State.MOVE) {
-            System.out.println("MOVEEEEEE");
-            switch(playerDirection) {
-                case UP:
-                    currentFrame = moveUpAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case RIGHT:case UPRIGHT:case DOWNRIGHT:
-                    currentFrame = moveRightAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case DOWN:
-                    currentFrame = moveDownAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case LEFT:case UPLEFT:case DOWNLEFT:
-                    currentFrame = moveLeftAnimation.getKeyFrame(stateTime, true);
-                    break;
-            }
-            return;
+    //if player.State == STAY
+    /*
+    private void setStayFrame(Direction playerLastDirection){
+        switch(playerLastDirection){
+            case UP:
+                currentFrame = moveUpAnimation.getKeyFrame(0, true);
+                break;
+            case RIGHT:case UPRIGHT:case DOWNRIGHT:
+                currentFrame = moveRightAnimation.getKeyFrame(0, true);
+                break;
+            case DOWN:
+                currentFrame = moveDownAnimation.getKeyFrame(0, true);
+                break;
+            case LEFT:case UPLEFT:case DOWNLEFT:
+                currentFrame = moveLeftAnimation.getKeyFrame(0, true);
+                break;
+        }
+    }*/
+
+    private void setCurrentFrame(Direction direction, float time){
+        switch(direction) {
+            case UP:
+                currentFrame = moveUpAnimation.getKeyFrame(time, true);
+                break;
+            case RIGHT:case UPRIGHT:case DOWNRIGHT:
+                currentFrame = moveRightAnimation.getKeyFrame(time, true);
+                break;
+            case DOWN:
+                currentFrame = moveDownAnimation.getKeyFrame(time, true);
+                break;
+            case LEFT:case UPLEFT:case DOWNLEFT:
+                currentFrame = moveLeftAnimation.getKeyFrame(time, true);
+                break;
         }
     }
 }

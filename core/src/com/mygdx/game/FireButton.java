@@ -48,7 +48,7 @@ public class FireButton {
         System.out.println(" Press");
         */
         if(sprite.getBoundingRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight()- Gdx.input.getY())){
-            System.out.println("CONTAINS!!!!!!!!!!!!!!!!!");
+            //System.out.println("CONTAINS!!!!!!!!!!!!!!!!!");
 
             isPressed = true;
         }
