@@ -10,7 +10,7 @@ public class Entity {
     float health;
     Rectangle rectangle;
     float moveSpeed;
-    float diagonal_speed;
+    //float 0.66 * moveSpeed;
     Direction direction;
 
     public Rectangle moveRectangle()
@@ -18,32 +18,32 @@ public class Entity {
         switch (direction)
         {
             case UP:
-                rectangle.y -= moveSpeed;
+                rectangle.y += moveSpeed;
                 break;
             case UPRIGHT:
-                rectangle.x += (diagonal_speed * moveSpeed);
-                rectangle.y -= (diagonal_speed * moveSpeed);
+                rectangle.x += (0.66 * moveSpeed);
+                rectangle.y += (0.66 * moveSpeed);
                 break;
             case RIGHT:
                 rectangle.x += moveSpeed;
                 break;
             case DOWNRIGHT:
-                rectangle.x += (diagonal_speed * moveSpeed);
-                rectangle.y += (diagonal_speed * moveSpeed);
+                rectangle.x += (0.66 * moveSpeed);
+                rectangle.y -= (0.66 * moveSpeed);
                 break;
             case DOWN:
-                rectangle.y += moveSpeed;
+                rectangle.y -= moveSpeed;
                 break;
             case DOWNLEFT:
-                rectangle.x -= (diagonal_speed * moveSpeed);
-                rectangle.y += (diagonal_speed * moveSpeed);
+                rectangle.x -= (0.66 * moveSpeed);
+                rectangle.y -= (0.66 * moveSpeed);
                 break;
             case LEFT:
                 rectangle.x -= moveSpeed;
                 break;
             case UPLEFT:
-                rectangle.x -= (diagonal_speed * moveSpeed);
-                rectangle.y -= (diagonal_speed * moveSpeed);
+                rectangle.x -= (0.66 * moveSpeed);
+                rectangle.y += (0.66 * moveSpeed);
                 break;
             case NONE:
                 break;
@@ -58,32 +58,32 @@ public class Entity {
         switch (lastDirection)
         {
             case UP:
-                rectangle.y -= moveSpeed;
+                rectangle.y += moveSpeed;
                 break;
             case UPRIGHT:
-                rectangle.x += (diagonal_speed * moveSpeed);
-                rectangle.y -= (diagonal_speed * moveSpeed);
+                rectangle.x += (0.66 * moveSpeed * moveSpeed);
+                rectangle.y += (0.66 * moveSpeed);
                 break;
             case RIGHT:
                 rectangle.x += moveSpeed;
                 break;
             case DOWNRIGHT:
-                rectangle.x += (diagonal_speed * moveSpeed);
-                rectangle.y += (diagonal_speed * moveSpeed);
+                rectangle.x += (0.66 * moveSpeed * moveSpeed);
+                rectangle.y -= (0.66 * moveSpeed);
                 break;
             case DOWN:
-                rectangle.y += moveSpeed;
+                rectangle.y -= moveSpeed;
                 break;
             case DOWNLEFT:
-                rectangle.x -= (diagonal_speed * moveSpeed);
-                rectangle.y += (diagonal_speed * moveSpeed);
+                rectangle.x -= (0.66 * moveSpeed * moveSpeed);
+                rectangle.y -= (0.66 * moveSpeed);
                 break;
             case LEFT:
                 rectangle.x -= moveSpeed;
                 break;
             case UPLEFT:
-                rectangle.x -= (diagonal_speed * moveSpeed);
-                rectangle.y -= (diagonal_speed * moveSpeed);
+                rectangle.x -= (0.66 * moveSpeed * moveSpeed);
+                rectangle.y += (0.66 * moveSpeed);
                 break;
             case NONE:
                 break;
@@ -92,5 +92,4 @@ public class Entity {
         }
         return rectangle;
     }
-
 }

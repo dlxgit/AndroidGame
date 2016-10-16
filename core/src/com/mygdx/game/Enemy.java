@@ -16,26 +16,29 @@ public class Enemy extends Entity {
         MOVE,
         STAY,
         ATTACK,
-        DAMAGED,
+        //DAMAGED,
         CAST,
         DEAD
     }
 
     public final float VISION_DISTANCE = 300.f;
+    public final float ATTACK_COOLDOWN = 3.f;
+    public final float ATTACK_DAMAGE = 30;
 
     State state;
-    public static final float moveSpeed = 5.f;
     //public static final float MAX_LIVING_TIME = 5.f;
     Texture texture;
     Sprite sprite;
     float livingTime;
     float rotationAngle;
 
+    float attackCooldown;
+
     EnemyAnimation animation;
 
 
-
     public Enemy(Vector2 position){
+        moveSpeed = 3.f;
         texture = new Texture(Gdx.files.internal("images/zombie.png"));
         sprite = new Sprite(texture);
         rectangle = new Rectangle(position.x, position.y, 250,37);
@@ -45,6 +48,7 @@ public class Enemy extends Entity {
         //pos = new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         sprite.setPosition(position.x, position.y);
         health = 100;
+        attackCooldown = 0;
     }
 
     private void updatePosition(){
@@ -54,15 +58,34 @@ public class Enemy extends Entity {
         moveRectangle();
     }
 
-    public void update(Rectangle playerRect) {
+    public void update(Player player) {
         this.livingTime += Gdx.graphics.getDeltaTime();
+
+
+        updateEnemyDirection(player.rectangle);
+
+        switch(state){
+            case SPAWN:
+                if(animation.isSpawnAnimationFinished())
+                    state = State.MOVE;
+                break;
+            case MOVE:
+                updatePosition();
+                break;
+            case ATTACK:
+                if(attackCooldown > 0){
+                    attackCooldown -= Gdx.graphics.getDeltaTime();
+                }
+                else{
+                    //PROCESS DAMAGE
+                    player.getDamage(ATTACK_DAMAGE);
+                }
+                break;
+        }
 
         if (health <= 0) {
             System.out.println("destroy bullet");
         }
-
-        calculateEnemyDirection(playerRect);
-        updatePosition();
         animation.update(state, direction);
     }
 
@@ -70,11 +93,12 @@ public class Enemy extends Entity {
         //batch.draw(texture,actorX,actorY);
         //sprite.draw(batch);
         animation.play(state, direction);
-        batch.draw(animation.getCurrentFrame(),  rectangle.x, rectangle.y);
+        batch.draw(animation.getCurrentFrame(), rectangle.x, rectangle.y);
     }
 
     private boolean isNearPlayer(Rectangle playerRect){
-        if(Math.abs(playerRect.x - rectangle.x) < VISION_DISTANCE && Math.abs(playerRect.y - rectangle.y) < VISION_DISTANCE) {
+        Vector2 distance = calculateDistance(playerRect);
+        if(distance.x < VISION_DISTANCE && distance.y < VISION_DISTANCE) {
             return true;
         }
         return false;
@@ -84,11 +108,15 @@ public class Enemy extends Entity {
 
     }
 
-    void calculateEnemyDirection(Rectangle playerRect)
-    {
-        //calculate distance and direction
+    Vector2 calculateDistance(Rectangle playerRect){
         Vector2 distance = new Vector2( Math.abs(playerRect.x - rectangle.x),
-                                        Math.abs(playerRect.y - rectangle.y));
+                Math.abs(playerRect.y - rectangle.y));
+        return distance;
+    }
+
+    void updateEnemyDirection(Rectangle playerRect) {
+        //calculate distance and direction
+        Vector2 distance = calculateDistance(playerRect);
         if (distance.x < 5 && distance.y < 5)
         {
             direction = Direction.NONE;
@@ -98,17 +126,19 @@ public class Enemy extends Entity {
             //TODO: check left-right direction zombie sprite bug (almost)
             if ((distance.x > 3 && distance.y > 3) && (distance.x / distance.y > 0.9) && (distance.y / distance.x < 1.1))
             {
-                if (playerRect.x >= rectangle.x && playerRect.y >= rectangle.y)
+                System.out.println("111111111111");
+                if (playerRect.x >= rectangle.x && playerRect.y <= rectangle.y)
                     direction = Direction.DOWNRIGHT;
-                else if (playerRect.x >= rectangle.x && playerRect.y < rectangle.y)
+                else if (playerRect.x >= rectangle.x && playerRect.y > rectangle.y)
                     direction = Direction.UPRIGHT;
-                else if (playerRect.x < rectangle.x && playerRect.y >= rectangle.y)
+                else if (playerRect.x < rectangle.x && playerRect.y <= rectangle.y)
                     direction = Direction.DOWNLEFT;
-                else if (playerRect.x < rectangle.x && playerRect.y < rectangle.y)
+                else if (playerRect.x < rectangle.x && playerRect.y > rectangle.y)
                     direction = Direction.UPLEFT;
             }
             else if (distance.x >= distance.y)
             {
+                System.out.println("2222222222");
                 if (playerRect.x > rectangle.x)
                     direction = Direction.RIGHT;
                 else
@@ -116,18 +146,13 @@ public class Enemy extends Entity {
             }
             else if (distance.x < distance.y)
             {
-                if (playerRect.y > rectangle.y)
+                System.out.println("33333333");
+                if (playerRect.y < rectangle.y)
                     direction = Direction.DOWN;
                 else
                     direction = Direction.UP;
             }
         }
+        //System.out.println(direction.toString());
     }
-
-    private void move(){
-        switch(direction){
-
-        }
-    }
-
 }

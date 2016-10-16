@@ -21,14 +21,17 @@ public class Player extends Entity{
         STAY,
         SHOOT,
         DAMAGED,
-        PICKUP,
-        RELOAD,
+        PICKUP,//
+        RELOAD,//not here
         DEAD
     }
 
+
     PlayerAnimation animation;
     public final Vector2 startPos = new Vector2(300, 300);
-    public final int defaultMoveSpeed = 5;
+    public final int defaultMoveSpeed = 10;
+    public final float ITEM_COOLDOWN = 0.5f;
+    public final float MAX_HEALTH = 100;
 
     Vector2 pos;
     Sprite sprite;
@@ -39,7 +42,14 @@ public class Player extends Entity{
     Direction lastDirection;
     State state;
 
+
+
+    float itemCooldown;
+    float ammo;
+
     public Player(Assets assets){
+        ammo = 100;
+        itemCooldown = 0;
         state = State.MOVE;
         direction = Direction.DOWN;
         lastDirection = Direction.DOWN;
@@ -65,15 +75,18 @@ public class Player extends Entity{
     public void updatePosition(TouchPad touchPad){
         //sprite.setPosition(sprite.getX() + touchPad.getDeltaDistance().x * moveSpeed, sprite.getY() + touchPad.getDeltaDistance().y * moveSpeed);
         rectangle.setPosition(rectangle.x + touchPad.getDeltaDistance().x * moveSpeed, rectangle.y + touchPad.getDeltaDistance().y * moveSpeed);
+        //moveRectangle(touchPad.getDeltaDistance().x * moveSpeed,touchPad.getDeltaDistance().x * moveSpeed);
     }
 
     public void updateDirection(Touchpad touchpad) {
         Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
         System.out.println("KNOB: " + String.valueOf(v.x) + " " + String.valueOf(v.y));
-        if(v.x < 10 && v.y < 10){
-            direction = Direction.NONE;
+        if(Math.abs(v.x) < 0.2 && Math.abs(v.y) < 0.2){
+            //direction = Direction.NONE;
+            state = Player.State.STAY;
             return;
         }
+        else state = Player.State.MOVE;
 
         float angle = v.angle();
         int nAngle = (int) ((angle + 45) / 90);
@@ -93,7 +106,7 @@ public class Player extends Entity{
                 break;
         }
 
-        if(direction != Direction.NONE){
+        if(state == Player.State.MOVE){
             lastDirection = direction;
         }
 
@@ -103,13 +116,43 @@ public class Player extends Entity{
     }
 
     public void update(TouchPad touchPad){
-        updatePosition(touchPad);
-        updateDirection(touchPad.getTouchpad());
-        animation.update(state, lastDirection);
+        //updatePosition(touchPad);
+        if(itemCooldown > 0){
+            itemCooldown -= Gdx.graphics.getDeltaTime();
+        }
 
+        updateDirection(touchPad.getTouchpad());
+        if(state == State.MOVE){
+            updatePosition(touchPad);
+        }
+        animation.update(state, lastDirection);
     }
 
     public Direction getLastDirection(){
         return lastDirection;
+    }
+
+    public float getItemCooldown(){
+        return itemCooldown;
+    }
+
+    public void setItemCooldown(float cooldown){
+        itemCooldown = cooldown;
+    }
+
+    public boolean isItemUsingAllowed(){
+        if(state != State.MOVE && state != State.STAY){
+            return false;
+        }
+        if (itemCooldown > 0) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public void getDamage(float damage){
+        health -= damage;
+        state = State.DAMAGED;
     }
 }

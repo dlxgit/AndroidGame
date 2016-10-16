@@ -6,6 +6,7 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -43,6 +44,11 @@ public class Game extends ApplicationAdapter {
 	Vector<Bullet> bulletList;
 	TileMap map;
 
+	HealthBar healthBar;
+
+
+	BitmapFont font;
+
 	@Override
 	public void create () {
 		assets = new Assets();
@@ -77,27 +83,49 @@ public class Game extends ApplicationAdapter {
 		Gdx.input.setInputProcessor(multiplexer);
 
 		rnd = new Random();
+
+		healthBar = new HealthBar(assets, new Vector2(30, 400));
+
+		//font = assets.manager.get(assets.fontFileName);
+		state = State.PLAY;
+
 	}
 
 	@Override
 	public void render () {
-		Gdx.gl.glClearColor(1, 0, 0, 1);
-		//Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		camera.update();
-		this.update();
-		//System.out.println(player.direction.toString());
-		stage.act(Gdx.graphics.getDeltaTime());
+		//Gdx.gl.glClearColor(1, 0, 0, 1);
+		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		switch (state) {
+			case PLAY:
+				camera.update();
+				this.update();
+				//System.out.println("State: " + player.state.toString() + " dir: " + player.direction.toString() + " lastDir: " + player.lastDirection.toString());
+				stage.act(Gdx.graphics.getDeltaTime());
 
-		batch.begin();
-		//batch.draw(img, 0, 0);
-		map.render(batch);
-		touchPad.render();
-		player.render(batch);
-		renderEnemies();
-		renderBullets();
-		fireButton.render(batch);
-		batch.end();
-		stage.draw();
+				batch.begin();
+				//batch.draw(img, 0, 0);
+				map.render(batch);
+				touchPad.render();
+				player.render(batch);
+				renderEnemies();
+				renderBullets();
+				fireButton.render(batch);
+
+				healthBar.render(batch);
+
+
+				//font.draw(batch, "Ammo: " + String.valueOf(player.ammo), 100, 100);
+
+				batch.end();
+				stage.draw();
+				break;
+
+			case END:
+
+				break;
+
+
+		}
 	}
 
 	@Override
@@ -114,23 +142,32 @@ public class Game extends ApplicationAdapter {
 		//System.out.print(gameTime);
 		//System.out.println(player.direction.toString());
 		player.update(touchPad);
-		System.out.println(player.lastDirection.toString());
+		//System.out.println(player.lastDirection.toString());
 		fireButton.update();
 		updateFireButtonState();
 
-		if((gameTime / 6) > enemyCount ){
+		//if((gameTime / 6) > enemyCount ){
+		if(enemyCount < 1){
 			enemyList.add(new Enemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1),rnd.nextInt(Gdx.graphics.getHeight() + 1))));
 			System.out.println("SPAWN!NEW");
 			enemyCount++;
 		}
 
-		if(fireButton.isPressed()){
+		if(fireButton.isPressed()) {
 			System.out.println("NEW BULLET!@@@@@@@@@@@@@@@@@@@@@@@");
-			bulletList.add(new Bullet(new Vector2(player.rectangle.x, player.rectangle.y), player.getLastDirection(), player.sprite.getRotation()));
+			if (player.isItemUsingAllowed() && player.ammo > 0) {
+				player.setItemCooldown(player.ITEM_COOLDOWN);
+				bulletList.add(new Bullet(player.rectangle, player.lastDirection, player.sprite.getRotation()));
+			}
 		}
-
-		updateBullets();
 		updateEnemies();
+
+		if(player.health <= 0){
+			state = State.END;
+		}
+		updateBullets();
+
+		healthBar.update((int)(player.health / player.MAX_HEALTH * 100), new Vector2(30, 400));
 	}
 
 	public void updateFireButtonState(){
@@ -145,7 +182,14 @@ public class Game extends ApplicationAdapter {
 		for (Iterator<Bullet> it = bulletList.iterator(); it.hasNext();){
 			Bullet bullet = it.next();
 			bullet.update();
-			if(bullet.livingTime > bullet.MAX_LIVING_TIME || bullet.intersects(enemyList)){
+			if(bullet.livingTime > bullet.MAX_LIVING_TIME){
+				it.remove();
+			}
+
+			Enemy intersected = bullet.intersects(enemyList);
+			if (intersected != null){
+				System.out.println("LOLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLLL");
+				intersected.state = Enemy.State.DEAD;
 				it.remove();
 			}
 		}
@@ -154,8 +198,8 @@ public class Game extends ApplicationAdapter {
 	public void updateEnemies(){
 		for (Iterator<Enemy> it = enemyList.iterator(); it.hasNext();){
 			Enemy enemy = it.next();
-			enemy.update(player.rectangle);
-			if(enemy.state == Enemy.State.DAMAGED){
+			enemy.update(player);
+			if(enemy.state == Enemy.State.DEAD && enemy.animation.isEnemyDeathAnimationFinished()){
 				it.remove();
 			}
 		}

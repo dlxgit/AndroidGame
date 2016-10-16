@@ -29,23 +29,42 @@ public class Bullet extends Entity {
     float livingTime;
     float rotationAngle;
 
-    public Bullet(Vector2 pos, Direction dir, float rotationAngle){
+    public Bullet(Rectangle playerRect, Direction dir, float rotationAngle){
         moveSpeed = 5.f;
         texture = new Texture(Gdx.files.internal("images/bullet.png"));
-        this.rotationAngle = rotationAngle;
+        //this.rotationAngle = rotationAngle;
         direction = dir;
         sprite = new Sprite(texture);
-        sprite.setPosition(pos.x, pos.y);
-        //sprite.setRotation(rotationAngle);
-        rectangle = new Rectangle(pos.x, pos.y, 7,3);
+        Vector2 playerCenter = new Vector2();
+        playerRect.getCenter(playerCenter);
+        sprite.setPosition(playerCenter.x, playerCenter.y);
+
+        int angle = 0;
+        if(dir == Direction.UP){
+            angle = 90;
+        }
+        else if (dir == Direction.LEFT){
+            angle = 180;
+        }
+        else if (dir == Direction.DOWN){
+            angle = 270;
+        }
+        rectangle = sprite.getBoundingRectangle();
+        //sprite.setOriginCenter();
+        //sprite.setRotation(angle);
+
+        //rectangle = new Rectangle(sprite.get)
+        //rectangle = new Rectangle(pos.x, pos.y, 7,3);
+        //rectangle = sprite.getBoundingRectangle();
+
         livingTime = 0;
-        moveSpeed = 5.f;
+        moveSpeed = 8.f;
     }
 
     private void updatePosition(){
         //sprite.setPosition((float)(sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
         //                   (float)(sprite.getY() + (moveSpeed * Math.sin((rotationAngle)* Math.PI / 180))));
-        moveRectangle();
+        rectangle = moveRectangle();
     }
 
     public void update(){
@@ -55,22 +74,24 @@ public class Bullet extends Entity {
             System.out.println("destroy bullet");
         }
         updatePosition();
+        System.out.println("Bullet " + rectangle.x + " " + rectangle.y + " " + direction);
     }
 
-    public boolean intersects(Vector<Enemy> enemyList){
+    public Enemy intersects(Vector<Enemy> enemyList){
         for (Enemy enemy : enemyList){
             if(sprite.getBoundingRectangle().overlaps(enemy.sprite.getBoundingRectangle())){
-                enemy.state = Enemy.State.DAMAGED;
-                return true;
+                //enemy.state = Enemy.State.DAMAGED;
+                System.out.println("INTERSECTS");
+                return enemy;
             }
         }
-        return false;
+        return null;
     }
 
     public void render(Batch batch){
         //batch.draw(texture,actorX,actorY);
-        sprite.setPosition(rectangle.x, rectangle.y);
+        sprite.setPosition(rectangle.getX(), rectangle.getY());
         sprite.draw(batch);
-        System.out.println(String.valueOf(rectangle.x) + " , " + String.valueOf(rectangle.y));
+        //System.out.println(String.valueOf(rectangle.x) + " , " + String.valueOf(rectangle.y));
     }
 }

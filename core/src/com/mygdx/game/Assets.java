@@ -1,9 +1,11 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.assets.loaders.BitmapFontLoader;
 import com.badlogic.gdx.assets.loaders.TextureLoader;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 
@@ -19,6 +21,12 @@ public class Assets {
     public static final String level1FileName = "level1.tmx";
     public static TiledMap lvl0;
 
+    public static final String healthBarBorderFileName = "images/healthBarBorder.png";
+    public static final String healthBarLineFileName = "images/healthBarLine.png";
+
+
+    public static final String fontFileName = "font/arialbd.ttf";
+
     public Assets(){
         //manager.load(heroTextureName, Texture.class);
         manager = new AssetManager();
@@ -32,6 +40,7 @@ public class Assets {
             System.out.println("Loaded: " + (int)(manager.getProgress() * 100) + "%");
         }
         System.out.println("Loaded: " + (int) (manager.getProgress() * 100) + "%");
+        loadFont();
     }
 
     public void loadTextures() {
@@ -39,6 +48,14 @@ public class Assets {
         manager.load(heroTextureName, Texture.class);
         manager.load(enemyTextureName, Texture.class);
         manager.load(fireButtonTextureName, Texture.class);
+
+        manager.load(healthBarBorderFileName, Texture.class);
+        manager.load(healthBarLineFileName, Texture.class);
+    }
+
+    public void loadFont(){
+        manager.setLoader(BitmapFont.class, new BitmapFontLoader(new InternalFileHandleResolver()));
+        manager.load(fontFileName, BitmapFont.class);
     }
 
     public void loadLevel(int level){
