@@ -16,7 +16,12 @@ public class Assets {
     public static AssetManager manager;
     public static final String heroTextureName = "images/hero.png";
     public static final String enemyTextureName = "images/zloyvrag.png";
+    public static final String npcTextureName = "images/npc.png";
     public static final String fireButtonTextureName = "images/fireButton.png";
+
+    public static final String itemsTextureName = "images/items.png";
+
+
     public static final String level0FileName = "levels/level0.tmx";
     public static final String level1FileName = "level1.tmx";
     public static TiledMap lvl0;
@@ -26,6 +31,7 @@ public class Assets {
 
 
     public static final String fontFileName = "font/arialbd.ttf";
+
 
     public Assets(){
         //manager.load(heroTextureName, Texture.class);
@@ -51,6 +57,8 @@ public class Assets {
 
         manager.load(healthBarBorderFileName, Texture.class);
         manager.load(healthBarLineFileName, Texture.class);
+        manager.load(npcTextureName, Texture.class);
+        manager.load(itemsTextureName, Texture.class);
     }
 
     public void loadFont(){

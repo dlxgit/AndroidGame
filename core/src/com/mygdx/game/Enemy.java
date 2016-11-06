@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
+import java.util.Vector;
+
 /**
  * Created by Andrey on 06.09.2016.
  */
@@ -22,7 +24,7 @@ public class Enemy extends Entity {
     }
 
     public final float VISION_DISTANCE = 300.f;
-    public final float ATTACK_COOLDOWN = 3.f;
+    public final float ATTACK_COOLDOWN = 2.f;
     public final float ATTACK_DAMAGE = 30;
 
     State state;
@@ -30,18 +32,20 @@ public class Enemy extends Entity {
     Texture texture;
     Sprite sprite;
     float livingTime;
-    float rotationAngle;
 
     float attackCooldown;
 
     EnemyAnimation animation;
 
+    public Enemy(){
+
+    }
 
     public Enemy(Vector2 position){
         moveSpeed = 3.f;
         texture = new Texture(Gdx.files.internal("images/zombie.png"));
         sprite = new Sprite(texture);
-        rectangle = new Rectangle(position.x, position.y, 250,37);
+        rectangle = new Rectangle(position.x, position.y, 27, 49);
         animation = new EnemyAnimation(texture);
         state = State.SPAWN;
         livingTime = 0;
@@ -49,6 +53,7 @@ public class Enemy extends Entity {
         sprite.setPosition(position.x, position.y);
         health = 100;
         attackCooldown = 0;
+        direction = Direction.NONE;
     }
 
     private void updatePosition(){
@@ -61,30 +66,47 @@ public class Enemy extends Entity {
     public void update(Player player) {
         this.livingTime += Gdx.graphics.getDeltaTime();
 
-
-        updateEnemyDirection(player.rectangle);
+        State lastState = state;
 
         switch(state){
             case SPAWN:
-                if(animation.isSpawnAnimationFinished())
+                if(animation.isSpawnAnimationFinished()) {
+                    direction = Direction.DOWN;
                     state = State.MOVE;
+                }
                 break;
             case MOVE:
+                updateEnemyDirection(player.rectangle);
                 updatePosition();
                 break;
             case ATTACK:
+                updateEnemyDirection(player.rectangle);
                 if(attackCooldown > 0){
+                    System.out.println("Enemy attack on cooldown, HERO HEALTH: " + player.health);
                     attackCooldown -= Gdx.graphics.getDeltaTime();
                 }
                 else{
                     //PROCESS DAMAGE
+                    attackCooldown = ATTACK_COOLDOWN;
+                    System.out.println("Enemy attack success");
                     player.getDamage(ATTACK_DAMAGE);
                 }
+                break;
+            case DEAD:
+                break;
+            default:
                 break;
         }
 
         if (health <= 0) {
-            System.out.println("destroy bullet");
+            System.out.println("Enemy DEAD");
+            state = State.DEAD;
+        }
+
+        //System.out.println("Enemy TIME: " + String.valueOf(animation.stateTime));
+        if(lastState != state){
+            System.out.println("Reset");
+            animation.stateTime = 0;
         }
         animation.update(state, direction);
     }
@@ -95,6 +117,7 @@ public class Enemy extends Entity {
         animation.play(state, direction);
         batch.draw(animation.getCurrentFrame(), rectangle.x, rectangle.y);
     }
+
 
     private boolean isNearPlayer(Rectangle playerRect){
         Vector2 distance = calculateDistance(playerRect);
@@ -117,6 +140,15 @@ public class Enemy extends Entity {
     void updateEnemyDirection(Rectangle playerRect) {
         //calculate distance and direction
         Vector2 distance = calculateDistance(playerRect);
+        if(overlaps(playerRect)){
+            state = State.ATTACK;
+        }
+        else{
+            if(state == State.ATTACK){
+                state = State.MOVE;
+            }
+        }
+
         if (distance.x < 5 && distance.y < 5)
         {
             direction = Direction.NONE;
@@ -126,7 +158,7 @@ public class Enemy extends Entity {
             //TODO: check left-right direction zombie sprite bug (almost)
             if ((distance.x > 3 && distance.y > 3) && (distance.x / distance.y > 0.9) && (distance.y / distance.x < 1.1))
             {
-                System.out.println("111111111111");
+                //System.out.println("111111111111");
                 if (playerRect.x >= rectangle.x && playerRect.y <= rectangle.y)
                     direction = Direction.DOWNRIGHT;
                 else if (playerRect.x >= rectangle.x && playerRect.y > rectangle.y)
@@ -138,7 +170,7 @@ public class Enemy extends Entity {
             }
             else if (distance.x >= distance.y)
             {
-                System.out.println("2222222222");
+                //System.out.println("2222222222");
                 if (playerRect.x > rectangle.x)
                     direction = Direction.RIGHT;
                 else
@@ -146,13 +178,19 @@ public class Enemy extends Entity {
             }
             else if (distance.x < distance.y)
             {
-                System.out.println("33333333");
+                //System.out.println("33333333");
                 if (playerRect.y < rectangle.y)
                     direction = Direction.DOWN;
                 else
                     direction = Direction.UP;
             }
         }
-        //System.out.println(direction.toString());
+    }
+
+    public boolean overlaps(Rectangle playerRect){
+        if(rectangle.overlaps(playerRect)){
+            return true;
+        }
+        return false;
     }
 }

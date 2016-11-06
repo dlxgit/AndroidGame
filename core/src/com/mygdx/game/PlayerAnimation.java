@@ -15,6 +15,17 @@ public class PlayerAnimation {
     Animation moveLeftAnimation;
 
     Animation damagedAnimation;
+
+    TextureRegion[] stayWithGunRegion;
+    TextureRegion[] stayWithExtinguisherRegion;
+    Animation throwGrenadeUpAnimation;
+    Animation throwGrenadeRightAnimation;
+    Animation throwGrenadeDownAnimation;
+    Animation throwGrenadeLeftAnimation;
+
+    TextureRegion grenade;
+
+
     float stateTime;
     TextureRegion currentFrame;
 
@@ -28,7 +39,6 @@ public class PlayerAnimation {
         //System.out.print(moveUpSplitted.length());
         moveUpAnimation = new Animation(0.02f, moveUpSplitted[0]);
         //stateTime = 0f;
-
 
         //105 + 22 * int(hero.currentFrame), 44, 21, 37));
         TextureRegion moveRightRegion = new TextureRegion(playerSheet, 105, 44, 88, 37);
@@ -52,8 +62,29 @@ public class PlayerAnimation {
         TextureRegion damagedRegion = new TextureRegion(playerSheet, 105, 179, 64, 37);
         TextureRegion[][] damagedSplitted = moveUpRegion.split(22, 37);
         //System.out.print(damagedSplitted.length());
-        damagedAnimation = new Animation(0.02f, damagedSplitted[0]);
+
+        TextureRegion[] reg = new TextureRegion[2];
+        for(int i = 0; i < 2; i++){
+            reg[i] = new TextureRegion(playerSheet, (10 + 32 * i), 179, 32, 45);
+        }
+
+        damagedAnimation = new Animation(0.3f, reg);
+        //damagedAnimation = new Animation(0.02f, damagedSplitted[0]);
         //stateTime = 0f;
+
+        TextureRegion stayWithExtinguisherRegion = new TextureRegion(playerSheet, 208, 3, 117, 87);
+        TextureRegion[][] stayWithWeaponRegionSplitted = stayWithExtinguisherRegion.split(29, 41);
+        this.stayWithGunRegion = stayWithWeaponRegionSplitted[0];
+        this.stayWithExtinguisherRegion = stayWithWeaponRegionSplitted[1];
+
+        TextureRegion throwGrenadeAnimationRegion = new TextureRegion(playerSheet, 374, 203, 58, 184);
+        TextureRegion[][] throwGrenadeSplitted = throwGrenadeAnimationRegion.split(29, 46);
+        throwGrenadeDownAnimation = new Animation(0.3f, throwGrenadeSplitted[0]);
+        throwGrenadeLeftAnimation = new Animation(0.3f, throwGrenadeSplitted[1]);
+        throwGrenadeUpAnimation = new Animation(0.3f, throwGrenadeSplitted[2]);
+        throwGrenadeRightAnimation = new Animation(0.3f, throwGrenadeSplitted[3]);
+
+        grenade = new TextureRegion(playerSheet, 462, 259, 14, 13);
     }
 
     public void update(Player.State state, Direction direction) {
@@ -67,7 +98,7 @@ public class PlayerAnimation {
     public void play(Player.State playerState, Direction playerLastDirection) {
         switch (playerState) {
             case DAMAGED:
-                currentFrame = damagedAnimation.getKeyFrame(stateTime, true);
+                currentFrame = damagedAnimation.getKeyFrame(stateTime, false);
                 break;
             case MOVE:
                 //System.out.println("MOVEEEEEE");

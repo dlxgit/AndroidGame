@@ -17,13 +17,17 @@ public class Player extends Entity{
     enum State{
         INIT,
         MOVE,
-        MOVE_FAST,
+        //TODO: MOVE_FAST,  (убрать из состояний, сделать лишь таймер и увеличение мса x2)
         STAY,
-        SHOOT,
+
         DAMAGED,
         PICKUP,//
         RELOAD,//not here
-        DEAD
+        DEAD,
+
+        SHOOT,
+        EXTINGUISH,
+        THROW_GRENADE,
     }
 
 
@@ -33,34 +37,31 @@ public class Player extends Entity{
     public final float ITEM_COOLDOWN = 0.5f;
     public final float MAX_HEALTH = 100;
 
-    Vector2 pos;
-    Sprite sprite;
+    public final float BULLET_DAMAGE = 100;
+
     Texture texture;
     int health;
-    int slotNo;
-    int nSlots;
+
     Direction lastDirection;
     State state;
 
+    boolean isBeastForm; //TODO: убрать поле и в месте проверки героя на состояние зверя проверять float beastTimerRemaining > 0;
 
 
     float itemCooldown;
     float ammo;
 
     public Player(Assets assets){
-        ammo = 100;
-        itemCooldown = 0;
         state = State.MOVE;
         direction = Direction.DOWN;
         lastDirection = Direction.DOWN;
 
         health = 100;
-        pos = new Vector2(startPos);
-        rectangle = new Rectangle(startPos.x, startPos.y, 88, 37);
+        rectangle = new Rectangle(startPos.x, startPos.y, 37, 88);
         texture = assets.manager.get(assets.heroTextureName);
         animation = new PlayerAnimation(texture);
-        sprite = new Sprite(texture);
-        sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2, Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2);
+        //sprite = new Sprite(texture);
+        //sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2, Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2);
         moveSpeed = defaultMoveSpeed;
     }
 
@@ -78,15 +79,27 @@ public class Player extends Entity{
         //moveRectangle(touchPad.getDeltaDistance().x * moveSpeed,touchPad.getDeltaDistance().x * moveSpeed);
     }
 
-    public void updateDirection(Touchpad touchpad) {
+    public void updateState(Touchpad touchpad) {
         Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
-        System.out.println("KNOB: " + String.valueOf(v.x) + " " + String.valueOf(v.y));
+        //System.out.println("KNOB: " + String.valueOf(v.x) + " " + String.valueOf(v.y));
+
+
+        if(state == State.DAMAGED){
+            if(animation.damagedAnimation.isAnimationFinished(animation.stateTime)){
+                System.out.println("DAMAGE_ANIMATION_FINISHED!");
+                state = State.MOVE;
+            }
+        }
         if(Math.abs(v.x) < 0.2 && Math.abs(v.y) < 0.2){
             //direction = Direction.NONE;
-            state = Player.State.STAY;
+            if(state != State.DAMAGED) {
+                state = Player.State.STAY;
+            }
             return;
         }
-        else state = Player.State.MOVE;
+        else if (state != State.DAMAGED){
+            state = Player.State.MOVE;
+        }
 
         float angle = v.angle();
         int nAngle = (int) ((angle + 45) / 90);
@@ -109,10 +122,6 @@ public class Player extends Entity{
         if(state == Player.State.MOVE){
             lastDirection = direction;
         }
-
-        if (v.x != 0 && v.y != 0) {
-            sprite.setRotation(angle);
-        }
     }
 
     public void update(TouchPad touchPad){
@@ -121,7 +130,7 @@ public class Player extends Entity{
             itemCooldown -= Gdx.graphics.getDeltaTime();
         }
 
-        updateDirection(touchPad.getTouchpad());
+        updateState(touchPad.getTouchpad());
         if(state == State.MOVE){
             updatePosition(touchPad);
         }
@@ -132,27 +141,10 @@ public class Player extends Entity{
         return lastDirection;
     }
 
-    public float getItemCooldown(){
-        return itemCooldown;
-    }
-
-    public void setItemCooldown(float cooldown){
-        itemCooldown = cooldown;
-    }
-
-    public boolean isItemUsingAllowed(){
-        if(state != State.MOVE && state != State.STAY){
-            return false;
-        }
-        if (itemCooldown > 0) {
-            return false;
-        }
-
-        return true;
-    }
 
     public void getDamage(float damage){
         health -= damage;
         state = State.DAMAGED;
+        animation.stateTime = 0;
     }
 }

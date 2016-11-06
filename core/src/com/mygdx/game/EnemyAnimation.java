@@ -20,6 +20,10 @@ public class EnemyAnimation {
     float stateTime;
     TextureRegion currentFrame;
 
+
+    final int DEATH_FRAMES = 5;
+    final float FRAME_DURATION = 0.5f;
+
     public EnemyAnimation(Texture enemySheet){
 
         //50 * int(enemy.currentFrame), 12, 33, 51
@@ -65,7 +69,6 @@ public class EnemyAnimation {
         //TextureRegion[][] deathAnimationSplitted = deathAnimationRegion.split(40, 37);
         //System.out.print(moveUpSplitted.length());
 
-
         stateTime = 0f;
         currentFrame = new TextureRegion();
     }
@@ -80,38 +83,20 @@ public class EnemyAnimation {
 
 
     public void play(Enemy.State state, Direction direction) {
-        System.out.println("EnemyState: " + state.toString());
-
-        if (state == Enemy.State.SPAWN) {
-            currentFrame = spawnAnimation.getKeyFrame(stateTime, false);
-            System.out.println("region" + currentFrame.getRegionX() + " " + currentFrame.getRegionY() + " " + currentFrame.getRegionWidth() + " " + currentFrame.getRegionHeight());
-            return;
-        }
-
-        System.out.println("region" + currentFrame.getRegionX() + " " + currentFrame.getRegionY() + " " + currentFrame.getRegionWidth() + " " + currentFrame.getRegionHeight());
         //System.out.println("EnemyState: " + state.toString());
-        if (state == Enemy.State.MOVE) {
-            //System.out.println("MOVEEEEEE");
-            switch(direction) {
-                case UP:
-                    currentFrame = moveUpAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case RIGHT:case UPRIGHT:case DOWNRIGHT:
-                    currentFrame = moveRightAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case DOWN:
-                    currentFrame = moveDownAnimation.getKeyFrame(stateTime, true);
-                    break;
-                case LEFT:case UPLEFT:case DOWNLEFT:
-                    currentFrame = moveLeftAnimation.getKeyFrame(stateTime, true);
-                    break;
-            }
-            return;
-        }
 
-        if(state == Enemy.State.DEAD){
-            currentFrame = deathAnimation.getKeyFrame(stateTime, false);
-            return;
+        switch (state) {
+            case SPAWN:
+                currentFrame = spawnAnimation.getKeyFrame(stateTime, false);
+                break;
+            case MOVE:
+                currentFrame = getMoveAnimationFrame(direction);
+                break;
+            case DEAD:
+                currentFrame = deathAnimation.getKeyFrame(stateTime, false);
+                break;
+            default:
+                break;
         }
     }
 
@@ -120,7 +105,29 @@ public class EnemyAnimation {
     }
 
     public boolean isEnemyDeathAnimationFinished(){
-        return deathAnimation.isAnimationFinished(stateTime);
+        //return deathAnimation.isAnimationFinished(stateTime);
+        //System.out.println("Enemy StateTime: " + String.valueOf(stateTime));
+        return stateTime > FRAME_DURATION * DEATH_FRAMES;
     }
 
+    private TextureRegion getMoveAnimationFrame(Direction direction){
+        TextureRegion frame = new TextureRegion();
+        switch(direction) {
+            case UP:
+                frame = moveUpAnimation.getKeyFrame(stateTime, true);
+                break;
+            case RIGHT:case UPRIGHT:case DOWNRIGHT:
+                frame = moveRightAnimation.getKeyFrame(stateTime, true);
+                break;
+            case DOWN:
+                frame = moveDownAnimation.getKeyFrame(stateTime, true);
+                break;
+            case LEFT:case UPLEFT:case DOWNLEFT:
+                frame = moveLeftAnimation.getKeyFrame(stateTime, true);
+                break;
+            default:
+                break;
+        }
+        return frame;
+    }
 }
