@@ -3,6 +3,7 @@ package com.mygdx.game;
         import com.badlogic.gdx.Gdx;
         import com.badlogic.gdx.graphics.Texture;
         import com.badlogic.gdx.graphics.g2d.Animation;
+        import com.badlogic.gdx.graphics.g2d.SpriteBatch;
         import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
@@ -23,45 +24,41 @@ public class PlayerAnimation {
     Animation throwGrenadeDownAnimation;
     Animation throwGrenadeLeftAnimation;
 
+
+    Animation fireExtinguisherAnimation;
+
+    Animation grenadeExplosionAnimation;
     TextureRegion grenade;
 
+    TextureRegion[] bulletRegion;
+    Animation bulletDestroyAnimation;
 
-    float stateTime;
-    TextureRegion currentFrame;
 
     public PlayerAnimation(Texture playerSheet) {
-        currentFrame = new TextureRegion();
-        stateTime = 0f;
-
         //(105 + 22 * int(hero.currentFrame), 84, 21, 37));
         TextureRegion moveUpRegion = new TextureRegion(playerSheet, 105, 84, 88, 37);
         TextureRegion[][] moveUpSplitted = moveUpRegion.split(22, 37);
         //System.out.print(moveUpSplitted.length());
         moveUpAnimation = new Animation(0.02f, moveUpSplitted[0]);
-        //stateTime = 0f;
 
         //105 + 22 * int(hero.currentFrame), 44, 21, 37));
         TextureRegion moveRightRegion = new TextureRegion(playerSheet, 105, 44, 88, 37);
         TextureRegion[][] moveRightSplitted = moveRightRegion.split(22, 37);
         moveRightAnimation = new Animation(0.02f, moveRightSplitted[0]);
-        //stateTime = 0f;
 
         //105 + 22 * int(hero.currentFrame), 4, 21, 37));
         TextureRegion moveDownRegion = new TextureRegion(playerSheet, 105, 4, 88, 37);
         TextureRegion[][] moveDownSplitted = moveDownRegion.split(22, 37);
         moveDownAnimation = new Animation(0.02f, moveDownSplitted[0]);
-        //stateTime = 0f;
 
         //105 + 22 * int(hero.currentFrame), 124, 21, 37));
         TextureRegion moveLeftRegion = new TextureRegion(playerSheet, 105, 124, 88, 37);
         TextureRegion[][] moveLeftSplitted = moveLeftRegion.split(22, 37);
         moveLeftAnimation = new Animation(0.02f, moveLeftSplitted[0]);
-        //stateTime = 0f;
 
         //10 + 32 * int(hero.currentFrame), 179, 32, 45
         TextureRegion damagedRegion = new TextureRegion(playerSheet, 105, 179, 64, 37);
         TextureRegion[][] damagedSplitted = moveUpRegion.split(22, 37);
-        //System.out.print(damagedSplitted.length());
 
         TextureRegion[] reg = new TextureRegion[2];
         for(int i = 0; i < 2; i++){
@@ -70,9 +67,8 @@ public class PlayerAnimation {
 
         damagedAnimation = new Animation(0.3f, reg);
         //damagedAnimation = new Animation(0.02f, damagedSplitted[0]);
-        //stateTime = 0f;
 
-        TextureRegion stayWithExtinguisherRegion = new TextureRegion(playerSheet, 208, 3, 117, 87);
+        TextureRegion stayWithExtinguisherRegion = new TextureRegion(playerSheet, 237, 3, 117, 87);
         TextureRegion[][] stayWithWeaponRegionSplitted = stayWithExtinguisherRegion.split(29, 41);
         this.stayWithGunRegion = stayWithWeaponRegionSplitted[0];
         this.stayWithExtinguisherRegion = stayWithWeaponRegionSplitted[1];
@@ -84,65 +80,95 @@ public class PlayerAnimation {
         throwGrenadeUpAnimation = new Animation(0.3f, throwGrenadeSplitted[2]);
         throwGrenadeRightAnimation = new Animation(0.3f, throwGrenadeSplitted[3]);
 
+
         grenade = new TextureRegion(playerSheet, 462, 259, 14, 13);
+
+        TextureRegion grenadeExplosionRegion = new TextureRegion(playerSheet,498, 76, 85, 398);
+        TextureRegion[][] grenadeExplosionSplitted = grenadeExplosionRegion.split(85, 67);
+        TextureRegion[] grenadeExplosionFrames = new TextureRegion[grenadeExplosionSplitted.length];
+        for(int i = 0; i < grenadeExplosionSplitted.length; ++i) {
+            grenadeExplosionFrames[i] = grenadeExplosionSplitted[i][0];
+        }
+        grenadeExplosionAnimation = new Animation(0.1f, grenadeExplosionFrames);
+
+
+        TextureRegion fireExtinguisherRegion = new TextureRegion(playerSheet,257, 134, 60, 16);
+        TextureRegion[][] fireExtinguisherSplitted = fireExtinguisherRegion.split(15, 16);
+        fireExtinguisherAnimation = new Animation(0.1f, fireExtinguisherSplitted[0]);
+
+
+        bulletRegion = new TextureRegion(playerSheet, 258, 510, 48, 21).split(16,21)[0];
+
+
+        TextureRegion bulletAnimationRegion = new TextureRegion(playerSheet, 322, 510, 32, 21);
+        TextureRegion[][] bulletAnimationSplitted = bulletAnimationRegion.split(16, 21);
+        bulletDestroyAnimation = new Animation(0.1f, bulletAnimationSplitted[0]);
     }
 
-    public void update(Player.State state, Direction direction) {
-        stateTime += Gdx.graphics.getDeltaTime();
-    }
-
-    public TextureRegion getCurrentFrame() {
-        return currentFrame;
-    }
-
-    public void play(Player.State playerState, Direction playerLastDirection) {
+    public TextureRegion getCurrentFrame(Player.State playerState, Direction playerLastDirection, float stateTime) {
         switch (playerState) {
             case DAMAGED:
-                currentFrame = damagedAnimation.getKeyFrame(stateTime, false);
-                break;
+                return damagedAnimation.getKeyFrame(stateTime, false);
             case MOVE:
-                //System.out.println("MOVEEEEEE");
-                setCurrentFrame(playerLastDirection, stateTime);
-                break;
+                return getMoveFrame(playerLastDirection, stateTime);
             case STAY:
-                setCurrentFrame(playerLastDirection, 0);
-                break;
+                return getMoveFrame(playerLastDirection, 0);
+            case SHOOT:
+                return stayWithGunRegion[Direction.getSide(playerLastDirection)];
+            case EXTINGUISH:
+                return stayWithExtinguisherRegion[Direction.getSide(playerLastDirection)];
+            case THROW_GRENADE:
+                return getThrowFrame(playerLastDirection, stateTime);
         }
+        return new TextureRegion();
     }
 
-    //if player.State == STAY
+    public TextureRegion getExtinguisherAnimation(float stateTime){
+        return fireExtinguisherAnimation.getKeyFrame(stateTime, true);
+    }
+
     /*
-    private void setStayFrame(Direction playerLastDirection){
+    private TextureRegion getStayFrame(Direction playerLastDirection){
         switch(playerLastDirection){
             case UP:
-                currentFrame = moveUpAnimation.getKeyFrame(0, true);
-                break;
+                return moveUpAnimation.getKeyFrame(0, true);
             case RIGHT:case UPRIGHT:case DOWNRIGHT:
-                currentFrame = moveRightAnimation.getKeyFrame(0, true);
-                break;
+                return moveRightAnimation.getKeyFrame(0, true);
             case DOWN:
-                currentFrame = moveDownAnimation.getKeyFrame(0, true);
-                break;
+                return moveDownAnimation.getKeyFrame(0, true);
             case LEFT:case UPLEFT:case DOWNLEFT:
-                currentFrame = moveLeftAnimation.getKeyFrame(0, true);
-                break;
+                return moveLeftAnimation.getKeyFrame(0, true);
         }
+        return new TextureRegion();
     }*/
 
-    private void setCurrentFrame(Direction direction, float time){
+    private TextureRegion getMoveFrame(Direction direction, float time){
         switch(direction) {
             case UP:
-                currentFrame = moveUpAnimation.getKeyFrame(time, true);
-                break;
+                return moveUpAnimation.getKeyFrame(time, true);
             case RIGHT:case UPRIGHT:case DOWNRIGHT:
-                currentFrame = moveRightAnimation.getKeyFrame(time, true);
-                break;
+                return moveRightAnimation.getKeyFrame(time, true);
             case DOWN:
-                currentFrame = moveDownAnimation.getKeyFrame(time, true);
-                break;
+                return moveDownAnimation.getKeyFrame(time, true);
             case LEFT:case UPLEFT:case DOWNLEFT:
-                currentFrame = moveLeftAnimation.getKeyFrame(time, true);
-                break;
+                return moveLeftAnimation.getKeyFrame(time, true);
         }
+        System.out.println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
+
+        return moveDownAnimation.getKeyFrame(0, true);
+    }
+
+    private TextureRegion getThrowFrame(Direction direction, float time){
+        switch(direction) {
+            case UP:
+                return throwGrenadeUpAnimation.getKeyFrame(time, true);
+            case RIGHT:case UPRIGHT:case DOWNRIGHT:
+                return throwGrenadeRightAnimation.getKeyFrame(time, true);
+            case DOWN:
+                return throwGrenadeDownAnimation.getKeyFrame(time, true);
+            case LEFT:case UPLEFT:case DOWNLEFT:
+                return throwGrenadeLeftAnimation.getKeyFrame(time, true);
+        }
+        return new TextureRegion();
     }
 }

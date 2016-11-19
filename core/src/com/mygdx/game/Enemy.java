@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -26,12 +27,14 @@ public class Enemy extends Entity {
     public final float VISION_DISTANCE = 300.f;
     public final float ATTACK_COOLDOWN = 2.f;
     public final float ATTACK_DAMAGE = 30;
+    public final int ACTION_COOLDOWN = 5;
 
     State state;
     //public static final float MAX_LIVING_TIME = 5.f;
-    Texture texture;
-    Sprite sprite;
+    //Texture texture;
+    //Sprite sprite;
     float livingTime;
+    public int actionCooldown = 1;
 
     float attackCooldown;
 
@@ -41,22 +44,22 @@ public class Enemy extends Entity {
 
     }
 
-    public Enemy(Vector2 position){
+    public Enemy(Vector2 position, Assets assets){
         moveSpeed = 3.f;
-        texture = new Texture(Gdx.files.internal("images/zombie.png"));
-        sprite = new Sprite(texture);
+        Texture texture = assets.manager.get(assets.enemyTextureName);
+        //sprite = new Sprite(texture);
         rectangle = new Rectangle(position.x, position.y, 27, 49);
         animation = new EnemyAnimation(texture);
         state = State.SPAWN;
         livingTime = 0;
         //pos = new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        sprite.setPosition(position.x, position.y);
+        //sprite.setPosition(position.x, position.y);
         health = 100;
         attackCooldown = 0;
         direction = Direction.NONE;
     }
 
-    private void updatePosition(){
+    protected void updatePosition(){
         //sprite.setPosition((float) (sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
         //        (float) (sprite.getY() + (moveSpeed * Math.sin((rotationAngle) * Math.PI / 180))));
         //rectangle.setPosition(rectangle.x + touchPad.getDeltaDistance().x * moveSpeed, rectangle.y + touchPad.getDeltaDistance().y * moveSpeed);
@@ -111,10 +114,10 @@ public class Enemy extends Entity {
         animation.update(state, direction);
     }
 
-    public void render(Batch batch){
+    public void render(SpriteBatch batch){
         //batch.draw(texture,actorX,actorY);
         //sprite.draw(batch);
-        animation.play(state, direction);
+
         batch.draw(animation.getCurrentFrame(), rectangle.x, rectangle.y);
     }
 
@@ -189,6 +192,18 @@ public class Enemy extends Entity {
 
     public boolean overlaps(Rectangle playerRect){
         if(rectangle.overlaps(playerRect)){
+            return true;
+        }
+        return false;
+    }
+
+    public boolean isAction()
+    {
+        System.out.println(String.valueOf(actionCooldown));
+        if(actionCooldown <= 0)
+        {
+            System.out.println("COOLDOWN ZERO");
+            actionCooldown = ACTION_COOLDOWN;
             return true;
         }
         return false;

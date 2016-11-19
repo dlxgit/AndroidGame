@@ -13,14 +13,17 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
  * Created by Andrey on 11.09.2016.
  */
 public class Assets {
-    public static AssetManager manager;
+    static AssetManager manager;
     public static final String heroTextureName = "images/hero.png";
-    public static final String enemyTextureName = "images/zloyvrag.png";
+    public static final String enemyTextureName = "images/zombie.png";
+    public static final String axeEnemyTextureName = "images/axe_enemy.png";
+
     public static final String npcTextureName = "images/npc.png";
     public static final String fireButtonTextureName = "images/fireButton.png";
 
-    public static final String itemsTextureName = "images/items.png";
+    public static final String bulletTextureName = "images/bullet.png";
 
+    public static final String itemsTextureName = "images/items.png";
 
     public static final String level0FileName = "levels/level0.tmx";
     public static final String level1FileName = "level1.tmx";
@@ -28,7 +31,6 @@ public class Assets {
 
     public static final String healthBarBorderFileName = "images/healthBarBorder.png";
     public static final String healthBarLineFileName = "images/healthBarLine.png";
-
 
     public static final String fontFileName = "font/arialbd.ttf";
 
@@ -53,6 +55,7 @@ public class Assets {
         manager.setLoader(Texture.class, new TextureLoader(new InternalFileHandleResolver()));
         manager.load(heroTextureName, Texture.class);
         manager.load(enemyTextureName, Texture.class);
+        manager.load(axeEnemyTextureName, Texture.class);
         manager.load(fireButtonTextureName, Texture.class);
 
         manager.load(healthBarBorderFileName, Texture.class);

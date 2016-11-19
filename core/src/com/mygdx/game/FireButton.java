@@ -29,13 +29,8 @@ public class FireButton {
     }
 
     private void updatePressState(){
+        isPressed = sprite.getBoundingRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight()- Gdx.input.getY());
 
-        if(sprite.getBoundingRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight()- Gdx.input.getY())){
-            //System.out.println("CONTAINS!!!!!!!!!!!!!!!!!");
-
-            isPressed = true;
-        }
-        else isPressed = false;
     }
 
     public boolean isPressed(){

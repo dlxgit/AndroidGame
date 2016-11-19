@@ -3,18 +3,15 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
 
 /**
  * Created by Andrey on 29.08.2016.
  */
-public class Player extends Entity{
-    enum State{
+public class Player extends Entity {
+    enum State {
         INIT,
         MOVE,
         //TODO: MOVE_FAST,  (убрать из состояний, сделать лишь таймер и увеличение мса x2)
@@ -51,9 +48,13 @@ public class Player extends Entity{
     float itemCooldown;
     float ammo;
 
-    public Player(Assets assets){
+    float actionTimeRemaining;
+
+    float stateTime = 0;
+
+    public Player(Assets assets) {
         state = State.MOVE;
-        direction = Direction.DOWN;
+        direction = Direction.NONE;
         lastDirection = Direction.DOWN;
 
         health = 100;
@@ -65,24 +66,36 @@ public class Player extends Entity{
         moveSpeed = defaultMoveSpeed;
     }
 
-    public void render(Batch batch){
+    public void render(Batch batch) {
         //batch.draw(texture,actorX,actorY);
         //sprite.draw(batch);
-        animation.play(state, direction);
-        batch.draw(animation.getCurrentFrame(), rectangle.x, rectangle.y);
+        batch.draw(animation.getCurrentFrame(state, lastDirection, stateTime), rectangle.x, rectangle.y);
     }
-        //sprite.draw(batch);
+    //sprite.draw(batch);
 
-    public void updatePosition(TouchPad touchPad){
+    public void updatePosition(TouchPad touchPad) {
         //sprite.setPosition(sprite.getX() + touchPad.getDeltaDistance().x * moveSpeed, sprite.getY() + touchPad.getDeltaDistance().y * moveSpeed);
         rectangle.setPosition(rectangle.x + touchPad.getDeltaDistance().x * moveSpeed, rectangle.y + touchPad.getDeltaDistance().y * moveSpeed);
         //moveRectangle(touchPad.getDeltaDistance().x * moveSpeed,touchPad.getDeltaDistance().x * moveSpeed);
     }
 
-    public void updateState(Touchpad touchpad) {
-        Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
-        //System.out.println("KNOB: " + String.valueOf(v.x) + " " + String.valueOf(v.y));
+    public void updateState() {
+        /*
 
+
+        if(state == State.THROW_GRENADE){
+            if(animation.throwGrenadeUpAnimation.isAnimationFinished(animation.stateTime)){
+                state = State.STAY;
+            }
+            return;
+        }
+        else if (state == State.SHOOT || state == State.EXTINGUISH){
+            float angle = v.angle();
+            int sidePart = (int) ((angle + 45) / 90);
+            //direction = Direction.intToDirection(sidePart);
+            //lastDirection = direction;
+            return;
+        }
 
         if(state == State.DAMAGED){
             if(animation.damagedAnimation.isAnimationFinished(animation.stateTime)){
@@ -102,39 +115,91 @@ public class Player extends Entity{
         }
 
         float angle = v.angle();
-        int nAngle = (int) ((angle + 45) / 90);
-        //System.out.println(nAngle);
-        switch(nAngle){
-            case 0:
-                direction = Direction.RIGHT;
-                break;
-            case 1:
-                direction = Direction.UP;
-                break;
-            case 2:
-                direction = Direction.LEFT;
-                break;
-            case 3:
-                direction = Direction.DOWN;
-                break;
-        }
+        int sidePart = (int) ((angle + 45) / 90);
+        direction = Direction.intToDirection(sidePart);
 
         if(state == Player.State.MOVE){
+            lastDirection = direction;
+        }
+        */
+
+        switch (state) {
+            case DAMAGED:
+                if (animation.damagedAnimation.isAnimationFinished(stateTime)) {
+                    System.out.println("DAMAGE_ANIMATION_FINISHED!");
+                    state = State.MOVE;
+                }
+                break;
+            case MOVE:
+                if (direction == Direction.NONE) {
+                    //direction = Direction.NONE;
+                    state = Player.State.STAY;
+                }
+                break;
+            case STAY:
+                if (direction != Direction.NONE) {
+                    state = State.MOVE;
+                }
+                break;
+            case SHOOT:
+                if(actionTimeRemaining < 0){
+                    state = State.STAY;
+                }
+                break;
+            case EXTINGUISH:
+                //if(//extinguishAnimation.hasFinished?){
+                    //state = State.STAY;
+                //}
+                //if firebutton.ispressed() == false state = STAY;
+                if(actionTimeRemaining < 0){
+                    state = State.STAY;
+                }
+
+                break;
+            case THROW_GRENADE:
+
+                break;
+        }
+    }
+
+
+    public void updateDirection(Touchpad touchpad){
+        Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
+        //System.out.println("KNOB: " + String.valueOf(v.x) + " " + String.valueOf(v.y));
+
+        if(Math.abs(v.x) < 0.2 && Math.abs(v.y) < 0.2) {
+            direction = Direction.NONE;
+        }else{
+            float angle = v.angle();
+            int sidePart = (int) ((angle + 45) / 90);
+            direction = Direction.intToDirection(sidePart);
+        }
+
+        if(direction != Direction.NONE){
             lastDirection = direction;
         }
     }
 
     public void update(TouchPad touchPad){
+        System.out.println("LastDir: " + lastDirection.toString());
         //updatePosition(touchPad);
         if(itemCooldown > 0){
             itemCooldown -= Gdx.graphics.getDeltaTime();
         }
+        if(actionTimeRemaining > 0){
+            actionTimeRemaining -= Gdx.graphics.getDeltaTime();
+        }
 
-        updateState(touchPad.getTouchpad());
+        updateDirection(touchPad.getTouchpad());
+        updateState();
+
         if(state == State.MOVE){
             updatePosition(touchPad);
         }
-        animation.update(state, lastDirection);
+        System.out.println(lastDirection.toString());
+        System.out.println(state.toString());
+
+        stateTime += Gdx.graphics.getDeltaTime();
     }
 
     public Direction getLastDirection(){
@@ -145,6 +210,6 @@ public class Player extends Entity{
     public void getDamage(float damage){
         health -= damage;
         state = State.DAMAGED;
-        animation.stateTime = 0;
+        stateTime = 0;
     }
 }

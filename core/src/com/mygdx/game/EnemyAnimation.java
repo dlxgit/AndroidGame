@@ -73,16 +73,7 @@ public class EnemyAnimation {
         currentFrame = new TextureRegion();
     }
 
-    public void update(Enemy.State state, Direction direction) {
-        stateTime += Gdx.graphics.getDeltaTime();
-    }
-
-    public TextureRegion getCurrentFrame() {
-        return currentFrame;
-    }
-
-
-    public void play(Enemy.State state, Direction direction) {
+    protected void update(Enemy.State state, Direction direction) {
         //System.out.println("EnemyState: " + state.toString());
 
         switch (state) {
@@ -98,6 +89,10 @@ public class EnemyAnimation {
             default:
                 break;
         }
+    }
+
+    public TextureRegion getCurrentFrame() {
+        return currentFrame;
     }
 
     public boolean isSpawnAnimationFinished(){

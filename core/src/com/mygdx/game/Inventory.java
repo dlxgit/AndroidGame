@@ -16,11 +16,13 @@ public class Inventory {
     private int nItem;
     private float cooldown;
 
-    final int ITEM_AMMO[] = new int[]{12, 6, 10, 1};
+    final int ITEM_AMMO[] = new int[]{12, 6, 50, 1};
 
 
     public Inventory(){
-        nItem = 0;
+        //nItem = 0;
+        nItem = 2;
+
         ammo = new Integer[4];
         initializeInventory();
         cooldown = 0;
@@ -40,10 +42,14 @@ public class Inventory {
     }
 
     public boolean useItem() {
-        if (ammo[nItem] > 0 && cooldown == 0) {
+        //TODO:: bug with endless bullets after taking loot smg         (или нету)
+        if (ammo[nItem] > 0 && cooldown == 0) { //if it has ammo and no cooldown
             System.out.println("Item_use");
             //TODO:COOLDOWN FROM CONST (just 1 value or for each item?)
-            cooldown = 1;
+            if(nItem != 2){ //set cooldown if its not fire-extinguisher(no cooldown)
+                cooldown = 1;
+            }
+
             ammo[nItem]--;
             return true;
         }
@@ -64,8 +70,6 @@ public class Inventory {
         ammo[1] = 3;
         ammo[2] = 0;
         ammo[3] = 0;
-
-        //lootList.add(new Loot())
     }
 
     public int getCurrentSlot(){

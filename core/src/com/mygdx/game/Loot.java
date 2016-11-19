@@ -56,5 +56,4 @@ public class Loot {
         batch.draw(region, rectangle.getX(), rectangle.getY());
         //batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
-
 }

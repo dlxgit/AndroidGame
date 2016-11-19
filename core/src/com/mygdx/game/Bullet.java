@@ -2,8 +2,11 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -23,21 +26,30 @@ public class Bullet extends Entity {
     }
 
     public final float MAX_LIVING_TIME = 3.f;
+    public final float DEATH_TIME = 1.f;
 
     Texture texture;
-    Sprite sprite;
     float livingTime;
     float rotationAngle;
 
-    public Bullet(Rectangle playerRect, Direction dir){
+    boolean isDead = false;
+
+    Animation deathAnimation;
+    Sprite sprite;
+
+    Bullet(){};
+
+    Bullet(Assets assets, Rectangle playerRect, Direction dir){
+        Texture bulletTexture = assets.manager.get(assets.bulletTextureName);
+        TextureRegion bulletAnimationRegion = new TextureRegion(bulletTexture, 322, 510, 32, 21);
+        TextureRegion[][] bulletAnimationSplitted = bulletAnimationRegion.split(16, 21);
+        deathAnimation = new Animation(0.1f, bulletAnimationSplitted[0]);
+
         moveSpeed = 5.f;
-        texture = new Texture(Gdx.files.internal("images/bullet.png"));
         //this.rotationAngle = rotationAngle;
         direction = dir;
-        sprite = new Sprite(texture);
         Vector2 playerCenter = new Vector2();
         playerRect.getCenter(playerCenter);
-        sprite.setPosition(playerCenter.x - sprite.getWidth() / 2, playerCenter.y - sprite.getHeight() / 2);
 
         int angle = 0;
         if(dir == Direction.UP){
@@ -49,38 +61,51 @@ public class Bullet extends Entity {
         else if (dir == Direction.DOWN){
             angle = 270;
         }
-        rectangle = sprite.getBoundingRectangle();
-        //sprite.setOriginCenter();
-        sprite.setRotation(angle);
-
-        //rectangle = new Rectangle(sprite.get)
-        //rectangle = new Rectangle(pos.x, pos.y, 7,3);
-        //rectangle = sprite.getBoundingRectangle();
+        rectangle = new Rectangle(playerCenter.x - 16 / 2, playerCenter.y / 2 - 21 / 2, 16, 21);
 
         livingTime = 0;
         moveSpeed = 8.f;
     }
 
-    private void updatePosition(){
+    protected void updatePosition(){
         //sprite.setPosition((float)(sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
         //                   (float)(sprite.getY() + (moveSpeed * Math.sin((rotationAngle)* Math.PI / 180))));
         moveRectangle();
-        sprite.setPosition(rectangle.getX(), rectangle.getY());
+        //sprite.setPosition(rectangle.getX(), rectangle.getY());
     }
 
     public void update(){
+        if(!isDead) {
+            updatePosition();
+        }
         this.livingTime += Gdx.graphics.getDeltaTime();
-
-        updatePosition();
         System.out.println("Bullet " + rectangle.x + " " + rectangle.y + " " + direction);
     }
+/*
+public TextureRegion getFrame(){
+    if(isDead){
+        return deathAnimation.getKeyFrame(deathTime, false);
+    }
 
+}*/
 
-
-    public void render(Batch batch){
+    void render(SpriteBatch batch){
         //batch.draw(texture,actorX,actorY);
         //sprite.setPosition(rectangle.getX(), rectangle.getY());
-        sprite.draw(batch);
+        //animation.(batch);
         //System.out.println(String.valueOf(rectangle.x) + " , " + String.valueOf(rectangle.y));
+        if(isDead){
+
+        }
     }
+
+    public boolean isDead(){
+        return isDead;
+    }
+
+    void die(){
+        isDead = true;
+        livingTime = 0;
+    }
+
 }

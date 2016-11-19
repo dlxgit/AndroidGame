@@ -53,6 +53,7 @@ public class Entity {
         return rectangle;
     }
 
+    /*
     public Rectangle moveRectangle(Direction lastDirection)
     {
         switch (lastDirection)
@@ -92,4 +93,5 @@ public class Entity {
         }
         return rectangle;
     }
+   */
 }
