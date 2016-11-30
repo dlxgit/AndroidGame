@@ -24,33 +24,44 @@ public class Bullet extends Entity {
         MOVE,
         EXPLODE
     }
+    enum Target{
+        PLAYER,
+        ENEMY
+    }
 
     public final float MAX_LIVING_TIME = 3.f;
-    public final float DEATH_TIME = 1.f;
+    public float DEATH_TIME = 1.f;
+    public float attackDamage;
 
     Texture texture;
     float livingTime;
     float rotationAngle;
-
     boolean isDead = false;
-
+    boolean isCollidable;
     Animation deathAnimation;
     Sprite sprite;
+
+    Target target;
 
     Bullet(){};
 
     Bullet(Assets assets, Rectangle playerRect, Direction dir){
-        Texture bulletTexture = assets.manager.get(assets.bulletTextureName);
-        TextureRegion bulletAnimationRegion = new TextureRegion(bulletTexture, 322, 510, 32, 21);
+        Texture playerSheet = assets.manager.get(assets.heroTextureName);
+
+        TextureRegion bulletAnimationRegion = new TextureRegion(playerSheet, 322, 510, 32, 21);
         TextureRegion[][] bulletAnimationSplitted = bulletAnimationRegion.split(16, 21);
         deathAnimation = new Animation(0.1f, bulletAnimationSplitted[0]);
 
+        sprite = new Sprite(playerSheet, 213, 158, 14, 14);
+
+        target = Target.ENEMY;
+        attackDamage = 100;
         moveSpeed = 5.f;
         //this.rotationAngle = rotationAngle;
         direction = dir;
         Vector2 playerCenter = new Vector2();
         playerRect.getCenter(playerCenter);
-
+        isCollidable = true;
         int angle = 0;
         if(dir == Direction.UP){
             angle = 90;
@@ -61,17 +72,20 @@ public class Bullet extends Entity {
         else if (dir == Direction.DOWN){
             angle = 270;
         }
+        sprite.setRotation(angle);
         rectangle = new Rectangle(playerCenter.x - 16 / 2, playerCenter.y / 2 - 21 / 2, 16, 21);
 
         livingTime = 0;
         moveSpeed = 8.f;
+
+
     }
 
     protected void updatePosition(){
         //sprite.setPosition((float)(sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
         //                   (float)(sprite.getY() + (moveSpeed * Math.sin((rotationAngle)* Math.PI / 180))));
         moveRectangle();
-        //sprite.setPosition(rectangle.getX(), rectangle.getY());
+        sprite.setPosition(rectangle.getX(), rectangle.getY());
     }
 
     public void update(){
@@ -79,23 +93,22 @@ public class Bullet extends Entity {
             updatePosition();
         }
         this.livingTime += Gdx.graphics.getDeltaTime();
-        System.out.println("Bullet " + rectangle.x + " " + rectangle.y + " " + direction);
-    }
-/*
-public TextureRegion getFrame(){
-    if(isDead){
-        return deathAnimation.getKeyFrame(deathTime, false);
+        //System.out.println("Bullet " + rectangle.x + " " + rectangle.y + " " + direction);
     }
 
-}*/
+    public TextureRegion getFrame() {
+        return deathAnimation.getKeyFrame(livingTime, false);
+    }
 
     void render(SpriteBatch batch){
         //batch.draw(texture,actorX,actorY);
-        //sprite.setPosition(rectangle.getX(), rectangle.getY());
         //animation.(batch);
         //System.out.println(String.valueOf(rectangle.x) + " , " + String.valueOf(rectangle.y));
         if(isDead){
-
+            batch.draw(getFrame(), rectangle.getX(), rectangle.getY());
+        }
+        else{
+            sprite.draw(batch);
         }
     }
 
@@ -108,4 +121,19 @@ public TextureRegion getFrame(){
         livingTime = 0;
     }
 
+    Target getTarget(){
+        return target;
+    }
+
+    boolean isExploded(){
+        return (!isDead && livingTime > MAX_LIVING_TIME) ||
+                (isDead && livingTime > DEATH_TIME);
+    }
+
+    boolean isCollisionWithTarget(Rectangle targetRect){
+        if (rectangle.overlaps(targetRect)){
+            return true;
+        }
+        return false;
+    }
 }

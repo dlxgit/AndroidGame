@@ -20,7 +20,7 @@ public class AxeEnemy extends Enemy{
         state = State.MOVE;
         direction = Direction.DOWN;
         moveSpeed = 3.f;
-        rectangle = new Rectangle(position.x, position.y, 27, 49);
+        rectangle = new Rectangle(position.x, position.y, 18, 30);
         livingTime = 0;
         //pos = new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         //sprite.setPosition(position.x, position.y);
@@ -51,13 +51,13 @@ public class AxeEnemy extends Enemy{
             case ATTACK:
                 updateEnemyDirection(player.rectangle);
                 if(attackCooldown > 0){
-                    System.out.println("Enemy attack on cooldown, HERO HEALTH: " + player.health);
+                    //System.out.println("Enemy attack on cooldown, HERO HEALTH: " + player.health);
                     attackCooldown -= Gdx.graphics.getDeltaTime();
                 }
                 else{
                     //PROCESS DAMAGE
                     attackCooldown = ATTACK_COOLDOWN;
-                    System.out.println("Enemy attack success");
+                    //System.out.println("Enemy attack success");
                     player.getDamage(ATTACK_DAMAGE);
                 }
                 break;
@@ -85,4 +85,5 @@ public class AxeEnemy extends Enemy{
     public void render(SpriteBatch batch){
         batch.draw(animation.getCurrentFrame(), rectangle.getX(), rectangle.getY());
     }
+
 }

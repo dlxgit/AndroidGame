@@ -96,13 +96,14 @@ public class PlayerAnimation {
         TextureRegion[][] fireExtinguisherSplitted = fireExtinguisherRegion.split(15, 16);
         fireExtinguisherAnimation = new Animation(0.1f, fireExtinguisherSplitted[0]);
 
-
+/*
         bulletRegion = new TextureRegion(playerSheet, 258, 510, 48, 21).split(16,21)[0];
 
 
         TextureRegion bulletAnimationRegion = new TextureRegion(playerSheet, 322, 510, 32, 21);
         TextureRegion[][] bulletAnimationSplitted = bulletAnimationRegion.split(16, 21);
         bulletDestroyAnimation = new Animation(0.1f, bulletAnimationSplitted[0]);
+        */
     }
 
     public TextureRegion getCurrentFrame(Player.State playerState, Direction playerLastDirection, float stateTime) {

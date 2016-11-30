@@ -34,8 +34,6 @@ public class Player extends Entity {
     public final float ITEM_COOLDOWN = 0.5f;
     public final float MAX_HEALTH = 100;
 
-    public final float BULLET_DAMAGE = 100;
-
     Texture texture;
     int health;
 
@@ -58,7 +56,7 @@ public class Player extends Entity {
         lastDirection = Direction.DOWN;
 
         health = 100;
-        rectangle = new Rectangle(startPos.x, startPos.y, 37, 88);
+        rectangle = new Rectangle(startPos.x, Game.MAP_SIZE.y - startPos.y, 19, 36);
         texture = assets.manager.get(assets.heroTextureName);
         animation = new PlayerAnimation(texture);
         //sprite = new Sprite(texture);
@@ -157,7 +155,9 @@ public class Player extends Entity {
 
                 break;
             case THROW_GRENADE:
-
+                if(actionTimeRemaining < 0){
+                    state = State.STAY;
+                }
                 break;
         }
     }
@@ -208,8 +208,8 @@ public class Player extends Entity {
 
 
     public void getDamage(float damage){
-        health -= damage;
-        state = State.DAMAGED;
+        //health -= damage;
+        //state = State.DAMAGED;
         stateTime = 0;
     }
 }

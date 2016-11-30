@@ -34,7 +34,7 @@ public class Enemy extends Entity {
     //Texture texture;
     //Sprite sprite;
     float livingTime;
-    public int actionCooldown = 1;
+    public float actionCooldown = 1;
 
     float attackCooldown;
 
@@ -85,13 +85,13 @@ public class Enemy extends Entity {
             case ATTACK:
                 updateEnemyDirection(player.rectangle);
                 if(attackCooldown > 0){
-                    System.out.println("Enemy attack on cooldown, HERO HEALTH: " + player.health);
+                    //System.out.println("Enemy attack on cooldown, HERO HEALTH: " + player.health);
                     attackCooldown -= Gdx.graphics.getDeltaTime();
                 }
                 else{
                     //PROCESS DAMAGE
                     attackCooldown = ATTACK_COOLDOWN;
-                    System.out.println("Enemy attack success");
+                    //System.out.println("Enemy attack success");
                     player.getDamage(ATTACK_DAMAGE);
                 }
                 break;
@@ -108,7 +108,7 @@ public class Enemy extends Entity {
 
         //System.out.println("Enemy TIME: " + String.valueOf(animation.stateTime));
         if(lastState != state){
-            System.out.println("Reset");
+            //System.out.println("Reset");
             animation.stateTime = 0;
         }
         animation.update(state, direction);
@@ -199,13 +199,16 @@ public class Enemy extends Entity {
 
     public boolean isAction()
     {
-        System.out.println(String.valueOf(actionCooldown));
+        //System.out.println(String.valueOf(actionCooldown));
         if(actionCooldown <= 0)
         {
-            System.out.println("COOLDOWN ZERO");
+            //System.out.println("COOLDOWN ZERO");
             actionCooldown = ACTION_COOLDOWN;
             return true;
         }
         return false;
+    }
+    public void setActionCooldown(){
+        actionCooldown = ACTION_COOLDOWN;
     }
 }
