@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -66,22 +67,24 @@ public class Axe extends Bullet {
 
         livingTime = 0;
         moveSpeed = 8.f;
+        isDead = false;
+        isCollision = false;
     }
 
     @Override
     public void updatePosition(){
         rectangle.x += step.x;
         rectangle.y += step.y;
-//        x2 = x1 + d * cos(theta)
-//        y2 = y1 + d * sin(theta)
-//        rectangle.x += MOVE_SPEED * Math.cos(angle);
-//        rectangle.y += MOVE_SPEED * Math.sin(angle);
     }
 
     @Override
-    public void update(){
+    public void update(MapObjects solidObjects){
         if(!isDead) {
-            updatePosition();
+            updatePositionByCountingCollision(solidObjects);
+            if(isCollision){
+                die();
+            }
+            //updatePosition();
             sprite.setPosition(rectangle.getX(), rectangle.getY());
             //sprite.rotate90(true);
         }
@@ -99,6 +102,6 @@ public class Axe extends Bullet {
 
     @Override
     public boolean isExploded(){
-        return false;
+        return isDead;
     }
 }

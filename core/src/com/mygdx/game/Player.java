@@ -3,6 +3,8 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
@@ -152,7 +154,6 @@ public class Player extends Entity {
                 if(actionTimeRemaining < 0){
                     state = State.STAY;
                 }
-
                 break;
             case THROW_GRENADE:
                 if(actionTimeRemaining < 0){
@@ -161,7 +162,6 @@ public class Player extends Entity {
                 break;
         }
     }
-
 
     public void updateDirection(Touchpad touchpad){
         Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
@@ -173,6 +173,7 @@ public class Player extends Entity {
             float angle = v.angle();
             int sidePart = (int) ((angle + 45) / 90);
             direction = Direction.intToDirection(sidePart);
+            System.out.println("Dir: " + direction.toString());
         }
 
         if(direction != Direction.NONE){
@@ -180,8 +181,8 @@ public class Player extends Entity {
         }
     }
 
-    public void update(TouchPad touchPad){
-        System.out.println("LastDir: " + lastDirection.toString());
+    public void update(TouchPad touchPad, MapObjects solidObjects){
+        //System.out.println("LastDir: " + lastDirection.toString());
         //updatePosition(touchPad);
         if(itemCooldown > 0){
             itemCooldown -= Gdx.graphics.getDeltaTime();
@@ -194,7 +195,8 @@ public class Player extends Entity {
         updateState();
 
         if(state == State.MOVE){
-            updatePosition(touchPad);
+            updatePositionByCountingCollision(solidObjects);
+            //updatePosition(touchPad);
         }
         System.out.println(lastDirection.toString());
         System.out.println(state.toString());

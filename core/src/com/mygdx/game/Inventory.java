@@ -2,6 +2,9 @@ package com.mygdx.game;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetLoaderParameters;
+
+import org.omg.Messaging.SYNC_WITH_TRANSPORT;
 
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -16,7 +19,7 @@ public class Inventory {
     private int nItem;
     private float cooldown;
 
-    final int ITEM_AMMO[] = new int[]{12, 6, 50, 1};
+    final int ITEM_AMMO[] = new int[]{12, 6, 50, 1}; //pistol, grenade, fire-ex, medicine
     boolean isChangeAllowed = true;
 
     public Inventory(){
@@ -29,12 +32,14 @@ public class Inventory {
     }
 
     public void takeItem(int itemIndex){
+
         ammo[itemIndex] += ITEM_AMMO[itemIndex];
     }
 
     public void changeItem() {
         if (isChangeAllowed) {
             nItem = getNextItemIndex();
+            isChangeAllowed = false;
         }
     }
 
@@ -60,6 +65,7 @@ public class Inventory {
         else{
             cooldown = 0;
         }
+        System.out.println(Loot.Type.getType(getCurrentSlot()).toString());
     }
 
     private void initializeInventory(){

@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -46,13 +47,14 @@ public class Bullet extends Entity {
     Bullet(){};
 
     Bullet(Assets assets, Rectangle playerRect, Direction dir){
+        System.out.println("BulletAdd");
         Texture playerSheet = assets.manager.get(assets.heroTextureName);
 
         TextureRegion bulletAnimationRegion = new TextureRegion(playerSheet, 322, 510, 32, 21);
         TextureRegion[][] bulletAnimationSplitted = bulletAnimationRegion.split(16, 21);
         deathAnimation = new Animation(0.1f, bulletAnimationSplitted[0]);
 
-        sprite = new Sprite(playerSheet, 213, 158, 14, 14);
+        sprite = new Sprite(new TextureRegion(playerSheet, 213, 158, 14, 14));
 
         target = Target.ENEMY;
         attackDamage = 100;
@@ -77,20 +79,19 @@ public class Bullet extends Entity {
 
         livingTime = 0;
         moveSpeed = 8.f;
-
-
+        isCollision = false;
     }
 
     protected void updatePosition(){
-        //sprite.setPosition((float)(sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
-        //                   (float)(sprite.getY() + (moveSpeed * Math.sin((rotationAngle)* Math.PI / 180))));
-        moveRectangle();
+        //moveRectangle();
+
         sprite.setPosition(rectangle.getX(), rectangle.getY());
     }
 
-    public void update(){
+    public void update(MapObjects solidObjects){
         if(!isDead) {
-            updatePosition();
+            updatePositionByCountingCollision(solidObjects);
+            //updatePosition();
         }
         this.livingTime += Gdx.graphics.getDeltaTime();
         //System.out.println("Bullet " + rectangle.x + " " + rectangle.y + " " + direction);
@@ -121,7 +122,7 @@ public class Bullet extends Entity {
         livingTime = 0;
     }
 
-    Target getTarget(){
+    final Target getTarget()  {
         return target;
     }
 

@@ -36,9 +36,9 @@ public enum Direction {
             case RIGHT: case UPRIGHT: case DOWNRIGHT:
                 return 0;
             case DOWN:
-                return 2;
-            case LEFT: case UPLEFT: case DOWNLEFT:
                 return 3;
+            case LEFT: case UPLEFT: case DOWNLEFT:
+                return 2;
         }
         return 0;
     }

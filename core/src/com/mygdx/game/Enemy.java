@@ -5,6 +5,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -21,7 +23,8 @@ public class Enemy extends Entity {
         ATTACK,
         //DAMAGED,
         CAST,
-        DEAD
+        DEAD,
+        EXPLODED
     }
 
     public final float VISION_DISTANCE = 300.f;
@@ -40,9 +43,9 @@ public class Enemy extends Entity {
 
     EnemyAnimation animation;
 
-    public Enemy(){
+    Enemy(){
 
-    }
+    };
 
     public Enemy(Vector2 position, Assets assets){
         moveSpeed = 3.f;
@@ -66,7 +69,8 @@ public class Enemy extends Entity {
         moveRectangle();
     }
 
-    public void update(Player player) {
+    public void update(Player player, MapObjects solidObjects) {
+
         this.livingTime += Gdx.graphics.getDeltaTime();
 
         State lastState = state;
@@ -80,7 +84,8 @@ public class Enemy extends Entity {
                 break;
             case MOVE:
                 updateEnemyDirection(player.rectangle);
-                updatePosition();
+                updatePositionByCountingCollision(solidObjects);
+                //updatePosition();
                 break;
             case ATTACK:
                 updateEnemyDirection(player.rectangle);
@@ -96,12 +101,16 @@ public class Enemy extends Entity {
                 }
                 break;
             case DEAD:
+                if(isDeathAnimationFinished()){
+                    state = State.EXPLODED;
+                }
                 break;
+
             default:
                 break;
         }
 
-        if (health <= 0) {
+        if (isDying()) {
             System.out.println("Enemy DEAD");
             state = State.DEAD;
         }
@@ -200,7 +209,7 @@ public class Enemy extends Entity {
     public boolean isAction()
     {
         //System.out.println(String.valueOf(actionCooldown));
-        if(actionCooldown <= 0)
+        if(state != State.DEAD && actionCooldown <= 0)
         {
             //System.out.println("COOLDOWN ZERO");
             actionCooldown = ACTION_COOLDOWN;
@@ -210,5 +219,22 @@ public class Enemy extends Entity {
     }
     public void setActionCooldown(){
         actionCooldown = ACTION_COOLDOWN;
+    }
+
+    public boolean isDeathAnimationFinished(){
+        //return deathAnimation.isAnimationFinished(stateTime);
+        //System.out.println("Enemy StateTime: " + String.valueOf(stateTime));
+        return animation.stateTime > animation.FRAME_DURATION * animation.DEATH_FRAMES;
+    }
+
+    public boolean isDying(){
+        if (
+             health <= 0 &&
+            (state == State.MOVE ||
+             state == State.ATTACK ||
+             state == State.SPAWN)){
+            return true;
+        }
+        return false;
     }
 }

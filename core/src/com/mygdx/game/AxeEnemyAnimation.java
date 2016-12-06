@@ -30,7 +30,7 @@ public class AxeEnemyAnimation {
     float stateTime;
 
     public AxeEnemyAnimation(Texture enemySheet) {
-
+        System.out.println("Anim_create");
         TextureRegion[][] enemyMoveRegion = new TextureRegion(enemySheet, 0, 0, 84, 124).split(21, 31);
         moveUpAnimation = new Animation(0.5f, enemyMoveRegion[0]);
         moveDownAnimation = new Animation(0.5f, enemyMoveRegion[1]);
@@ -80,7 +80,7 @@ public class AxeEnemyAnimation {
                 currentFrame = deathAnimation.getKeyFrame(stateTime, false);
                 break;
             case ATTACK:
-                currentFrame =getAttackFrame(direction);
+                currentFrame = getAttackFrame(direction);
                 break;
             default:
                 break;

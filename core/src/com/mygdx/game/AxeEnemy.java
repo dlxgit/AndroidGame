@@ -2,8 +2,8 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 public class AxeEnemy extends Enemy{
 
     AxeEnemyAnimation animation;
+
 
 
     public AxeEnemy(Vector2 position, Assets assets){
@@ -31,22 +32,19 @@ public class AxeEnemy extends Enemy{
         actionCooldown = 2;
     }
 
-    //use ability (throw axe)
-    void act()
-    {
-
-    }
-
     @Override
-    public void update(Player player) {
+    public void update(Player player, MapObjects solidObjects) {
         this.livingTime += Gdx.graphics.getDeltaTime();
-
+        System.out.println("Health: " + health);
         State lastState = state;
+
+
 
         switch(state){
             case MOVE:
                 updateEnemyDirection(player.rectangle);
-                updatePosition();
+                updatePositionByCountingCollision(solidObjects);
+                //updatePosition();
                 break;
             case ATTACK:
                 updateEnemyDirection(player.rectangle);
@@ -62,12 +60,15 @@ public class AxeEnemy extends Enemy{
                 }
                 break;
             case DEAD:
+                if(isDeathAnimationFinished()){
+                    state = State.EXPLODED;
+                }
                 break;
             default:
                 break;
         }
 
-        if (health <= 0) {
+        if(isDying()){ //if is now dying
             System.out.println("Enemy DEAD");
             state = State.DEAD;
         }
@@ -86,4 +87,10 @@ public class AxeEnemy extends Enemy{
         batch.draw(animation.getCurrentFrame(), rectangle.getX(), rectangle.getY());
     }
 
+    @Override
+    public boolean isDeathAnimationFinished(){
+        return state == State.DEAD && animation.deathAnimation.getKeyFrameIndex(animation.stateTime) == animation.deathAnimation.getKeyFrames().length - 1;
+
+        //if(state == State.DEAD && animation.stateTime > animation.deathAnimation.getFrameDuration() * animation.deathAnimation.getKeyFrameIndex())
+    }
 }

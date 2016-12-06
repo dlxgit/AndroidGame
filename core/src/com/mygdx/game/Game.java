@@ -3,7 +3,6 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -11,10 +10,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -73,8 +69,17 @@ To do:
  */
 
 /*
-	добавить миникарту
+    не рисует пули, взрывы гранат
+    некорректно рисует огнетушитель
+    нет текста на экране
+    плохое расположение интерфейса
+    нет меню
+    нет музыки
+    не реализована полоска хп, боеприпасы на экране
+
  */
+
+
 
 public class Game extends ApplicationAdapter {
 	enum State {
@@ -106,6 +111,7 @@ public class Game extends ApplicationAdapter {
 	TouchPad touchPad;
 
 	InputController inputController;
+
 	PressButton fireButton;
 	PressButton changeSlotButton;
 	PressButton escapeButton;
@@ -133,6 +139,12 @@ public class Game extends ApplicationAdapter {
 	ShapeRenderer shapeRenderer;
 
 	Viewport viewport;
+
+
+
+
+
+	MapObjects solidObjects;
 
 	@Override
 	public void create() {
@@ -204,12 +216,14 @@ public class Game extends ApplicationAdapter {
 
 		healthBar = new HealthBar(assets, new Vector2(30, 400));
 
-		//lootList.add(new Loot(assets, Loot.Type.SMG, new Rectangle(200,200, 16,16)));
-		//lootList.add(new Loot(assets, Loot.Type.FIRE_EXTINGUISHER, new Rectangle(200,200, 16,16)));
-		lootList.add(new Loot(assets, Loot.Type.GRENADE, new Rectangle(200, 200, 16, 16)));
+		lootList.add(new Loot(assets, Loot.Type.SMG, new Vector2(200,1500 + 1200)));
+		lootList.add(new Loot(assets, Loot.Type.FIRE_EXTINGUISHER, new Vector2(200,1600 + 1200)));
+		lootList.add(new Loot(assets, Loot.Type.GRENADE, new Vector2(200, 1700 + 1200)));
 		state = State.PLAY;
 
 		font = assets.manager.get("font/testFont.fnt", BitmapFont.class);
+
+		solidObjects = map.lvl.getLayers().get("solid").getObjects();
 	}
 
 	@Override
@@ -225,10 +239,10 @@ public class Game extends ApplicationAdapter {
 				this.update();
 				map.update(camera);
 				//System.out.println("State: " + player.state.toString() + " dir: " + player.direction.toString() + " lastDir: " + player.lastDirection.toString());
-				System.out.println("PlayerState: " + player.state.toString());
-				System.out.println("Survived Npcs: " + String.valueOf(survivedNpcs));
-				System.out.println("Inventory index: " + String.valueOf(inventory.getCurrentSlot()));
-				System.out.println("AMMO: " + String.valueOf(inventory.ammo[inventory.getCurrentSlot()]));
+//				System.out.println("PlayerState: " + player.state.toString());
+//				System.out.println("Survived Npcs: " + String.valueOf(survivedNpcs));
+//				System.out.println("Inventory index: " + String.valueOf(inventory.getCurrentSlot()));
+//				System.out.println("AMMO: " + String.valueOf(inventory.ammo[inventory.getCurrentSlot()]));
 				stage.act(Gdx.graphics.getDeltaTime());
 				map.render(batch);
 
@@ -239,16 +253,17 @@ public class Game extends ApplicationAdapter {
 				touchPad.render();
 				player.render(batch);
 				renderEnemies();
+                renderNpcs();
+                renderLoot();
 				renderBullets();
-				renderNpcs();
-				renderLoot();
+
 
 				fireButton.render(batch);
 				changeSlotButton.render(batch);
 
 				healthBar.render(batch);
 				renderUI(batch);
-
+				//renderShape(fireButton.sprite.getBoundingRectangle());
 
 				if (player.state == Player.State.EXTINGUISH) {
 					TextureRegion region = player.animation.getExtinguisherAnimation(player.stateTime);
@@ -256,7 +271,12 @@ public class Game extends ApplicationAdapter {
 					batch.draw(region, pos.x, pos.y);
 				}
 
-				renderShape(player.rectangle);
+				//renderShape(player.rectangle);
+				//renderShape(new Rectangle(0,0, 100, 100));
+                //renderShape(new Rectangle(320.5f, 190.5f, 383.5f, 47f));
+//				renderShape(fireButton.sprite.getBoundingRectangle());
+//				renderShape(player.rectangle);
+
 				batch.end();
 				stage.draw();
 
@@ -266,7 +286,6 @@ public class Game extends ApplicationAdapter {
 			case END:
 
 				break;
-
 		}
 	}
 
@@ -309,67 +328,28 @@ public class Game extends ApplicationAdapter {
 	}
 
 	public void update() {
-		gameTime += Gdx.graphics.getDeltaTime();
-		//System.out.println("gameTime " + String.valueOf(gameTime));
+        gameTime += Gdx.graphics.getDeltaTime();
+        //System.out.println("gameTime " + String.valueOf(gameTime));
 
-		player.update(touchPad);
-		//System.out.println(player.lastDirection.toString());
-		fireButton.update();
-		updateButtonState(fireButton);
-		changeSlotButton.update();
-		updateButtonState(changeSlotButton);
+        player.update(touchPad, solidObjects);
+        //System.out.println(player.lastDirection.toString());
+        fireButton.update(inputController);
 
-		//if((gameTime / 6) > enemyCount ){
-		if (enemyCount < 1) {
-			//TODO: spawn axe enemies only near player (and simple zombies too?)
-			enemyList.add(new AxeEnemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1), rnd.nextInt(Gdx.graphics.getHeight() + 1)), assets));
-			System.out.println("Enemy spawning");
-			enemyCount++;
-		}
+        changeSlotButton.update(inputController);
+        //updateButtonState(changeSlotButton);
 
-		//TODO: make button on screen to control inventory
-		if (changeSlotButton.isPressed()) {
-			inventory.changeItem();
-		} else {
-			inventory.isChangeAllowed = true;
-		}
+        //if((gameTime / 6) > enemyCount ){
+        if (enemyCount < 1) {
+            //TODO: spawn axe enemies only near player (and simple zombies too?)
+            enemyList.add(new AxeEnemy(new Vector2(player.rectangle.x + 200, player.rectangle.y), assets));
 
-		if (fireButton.isPressed() && (player.state == Player.State.MOVE || player.state == Player.State.STAY)) {
-			System.out.println("Trying use item_ ");
-			if (inventory.useItem()) {
-				switch (inventory.getCurrentSlot()) {
-					case 0://smg shot
-						System.out.println("SMG SHOT");
-						bulletList.add(new Bullet(assets, player.rectangle, player.lastDirection));
-						player.state = Player.State.SHOOT;
-						player.actionTimeRemaining = SMG_USING_TIME;
-						break;
-					case 1://grenade throw
-						System.out.println("GRENADE");
-						player.state = Player.State.THROW_GRENADE;
-						bulletList.add(new Grenade(assets, player.rectangle, player.lastDirection));
-						player.actionTimeRemaining = GRENADE_THROW_ACTION_TIME;
-						break;
-					case 2://fire-extinguisher use
-						System.out.println("FIRE_EXT");
-						player.state = Player.State.EXTINGUISH;
-						player.actionTimeRemaining = SMG_USING_TIME;
-						break;
-					case 3://medicine use
-						System.out.println("MEDICINE");
-						//TODO: use medicine
-						break;
-					default:
-						break;
-				}
-			}
-			/*
-			if (player.isItemUsingAllowed() && player.ammo > 0) {
-				player.setItemCooldown(player.ITEM_COOLDOWN);
-				bulletList.add(new Bullet(player.rectangle, player.lastDirection, player.sprite.getRotation()));
-			}
-			*/
-		}
+            //enemyList.add(new AxeEnemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1), rnd.nextInt(Gdx.graphics.getHeight() + 1)), assets));
+            System.out.println("Enemy spawn");
+            enemyCount++;
+        }
+
+        //TODO: make button on screen to control inventory
+        handleInventory();
 
 		updateBullets();
 		updateEnemies();
@@ -384,40 +364,42 @@ public class Game extends ApplicationAdapter {
 		healthBar.update((int) (player.health / player.MAX_HEALTH * 100), new Vector2(30, 400));
 	}
 
-	public void updateButtonState(PressButton button) {
-
-		if (inputController.isTouched && button.sprite.getBoundingRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY())) {
-			button.isPressed = true;
-		} else button.isPressed = false;
-	}
 
 	public void updateBullets() {
 		for (Iterator<Bullet> it = bulletList.iterator(); it.hasNext(); ) {
 			Bullet bullet = it.next();
-			bullet.update();
-			//System.out.println("Time: " + String.valueOf(bullet.livingTime) + " " + String.valueOf(bullet.DEATH_TIME));
+			bullet.update(solidObjects);
+			System.out.println("Time: " + String.valueOf(bullet.livingTime) + " " + String.valueOf(bullet.DEATH_TIME));
 			if (bullet.isDead()) {
-				bullet.livingTime += 0.0001;
+				//bullet.livingTime += 0.0001;
+                bullet.livingTime += Gdx.graphics.getDeltaTime();
 			}
 
 
 			if (bullet.getTarget() == Bullet.Target.PLAYER && bullet.isCollisionWithTarget(player.rectangle)) {
 				player.getDamage(bullet.attackDamage);
+                System.out.println("BulletRemove_@@@@@@@@@@@@@@@@@@@" + bullet.livingTime);
 				it.remove();
 				continue;
 			}
 
 			//checking collision with map
 
+            if (bullet.isExploded()) {//if bullet finished its deathanimation(bullet explosion/grenade explosion)
+                System.out.println("Expld");
+                System.out.println("BulletRemove_@@@@@@@@@@@@@@@@@@@ " + bullet.livingTime);
+                it.remove();
+                continue;
+            }
+
 			if (bullet.isCollidable) {
-				if (isCollisionWithMap(bullet.rectangle)) {
+                if(bullet.isCollision){
+				//if (isCollisionWithMap(bullet.rectangle)) {
 					bullet.die();
 				}
 				continue;
-			} else if (bullet.isExploded()) {//if bullet finished its deathanimation(bullet explosion/grenade explosion)
-				it.remove();
-				continue;
 			}
+
 
 			//TODO:if(bullet.needToCalculateIntersectWithEnemies()) {
 
@@ -428,8 +410,12 @@ public class Game extends ApplicationAdapter {
 
 				if (bullet.isCollisionWithTarget(enemy.rectangle)) {
 					System.out.println("bullet intersects with enemy");
-					enemy.health -= bullet.attackDamage;
-					if (bullet.isCollidable) {
+                    if(!bullet.isDead()){ //if bullet
+                        enemy.health -= bullet.attackDamage;
+                    }
+
+					if (bullet.isCollidable) { //if grenade
+                        System.out.println("BulletRemove_@@@@@@@@@@@@@@@@@@@ " + bullet.livingTime);
 						it.remove();
 						break;
 					}
@@ -442,14 +428,16 @@ public class Game extends ApplicationAdapter {
 	public void updateEnemies() {
 		for (Iterator<Enemy> it = enemyList.iterator(); it.hasNext(); ) {
 			Enemy enemy = it.next();
-			enemy.update(player);
+			enemy.update(player, solidObjects);
 
 			if (enemy.isAction()) {
 				enemy.setActionCooldown();
-				bulletList.add(new Axe(assets, player.rectangle, enemy.rectangle, enemy.direction));
+				//bulletList.add(new Axe(assets, player.rectangle, enemy.rectangle, enemy.direction));
 			}
 
-			if (enemy.state == Enemy.State.DEAD && enemy.animation.isEnemyDeathAnimationFinished()) {
+			//enemy.animation.isDeathAnimationFinished();
+			System.out.println("ENemyState :  " + enemy.state.toString());
+			if (enemy.state == Enemy.State.EXPLODED) {
 				it.remove();
 			}
 		}
@@ -460,7 +448,7 @@ public class Game extends ApplicationAdapter {
 			Npc npc = it.next();
 			npc.update();
 
-			if (npc.isLiving() == false) {
+			if (!npc.isLiving()) {
 				System.out.println("Npc Death stateTime: " + String.valueOf(npc.animation.stateTime));
 				if (npc.animation.isDeathAnimationFinished()) {
 					it.remove();
@@ -473,8 +461,7 @@ public class Game extends ApplicationAdapter {
 			}
 
 
-			for (Iterator<Enemy> itEnemy = enemyList.iterator(); itEnemy.hasNext(); ) {
-				Enemy enemy = itEnemy.next();
+			for (Enemy enemy : enemyList) {
 				if (npc.rectangle.overlaps(enemy.rectangle)) {
 					System.out.println("NPC_TOUCH_ENEMY!!");
 					npc.die();
@@ -510,24 +497,26 @@ public class Game extends ApplicationAdapter {
 				}
 				it.remove();
 			}
-
 		}
 	}
 
-	public void renderShape(Rectangle rect) {
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-		shapeRenderer.setColor(Color.RED);
-		shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-		if (rect.overlaps(new Rectangle(Gdx.input.getX(), Gdx.input.getY(), 1, 1))) {
-			System.out.println("RECTANGLE_INTERSECT");
-		}
-		shapeRenderer.end();
-	}
+//	public void renderShape(Rectangle rect) {
+////		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+////		shapeRenderer.setColor(Color.RED);
+////		shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
+////
+////		shapeRenderer.end();
+//		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+//		shapeRenderer.setColor(Color.RED);
+//		shapeRenderer.rect(100, 100, 500, 500);
+//
+//		shapeRenderer.end();
+//	}
 
 	public void renderBullets() {
 		for (Bullet bullet : bulletList) {
 			bullet.render(batch);
-			//renderShape(bullet.rectangle);
+
 		}
 	}
 
@@ -591,13 +580,14 @@ public class Game extends ApplicationAdapter {
 				*/
 			}
 			if (isPositionFree) {
-				return (new Loot(assets, Loot.Type.values()[rand.nextInt(Npc.Type.values().length)], lootRect));
+				return (new Loot(assets, Loot.Type.values()[rand.nextInt(Npc.Type.values().length)], new Vector2(lootRect.x, lootRect.y)));
 			}
 		}
 	}
 
 	private boolean isCollisionWithMap(Rectangle entityRect) {
-		return false;
+
+        return false;
 	}
 
 	public void renderUI(SpriteBatch batch) {
@@ -605,4 +595,42 @@ public class Game extends ApplicationAdapter {
 		font.draw(batch, "Ammo: " + String.valueOf(player.ammo), 400, 500);
 	}
 
+    public void handleInventory(){
+        if (changeSlotButton.isPressed() && inventory.isChangeAllowed) {
+            inventory.changeItem();
+
+        } else if (!changeSlotButton.isPressed()){
+            inventory.isChangeAllowed = true;
+        }
+
+        if (fireButton.isPressed() && (player.state == Player.State.MOVE || player.state == Player.State.STAY)) {
+
+            if (inventory.useItem()) {
+                System.out.println("ITEM_USING_ ");
+                switch (inventory.getCurrentSlot()) {
+                    case 0://smg shot
+                        System.out.println("SMG SHOT");
+                        bulletList.add(new Bullet(assets, player.rectangle, player.lastDirection));
+                        player.state = Player.State.SHOOT;
+                        player.actionTimeRemaining = SMG_USING_TIME;
+                        break;
+                    case 1://grenade throw
+                        System.out.println("GRENADE");
+                        player.state = Player.State.THROW_GRENADE;
+                        bulletList.add(new Grenade(assets, player.rectangle, player.lastDirection));
+                        player.actionTimeRemaining = GRENADE_THROW_ACTION_TIME;
+                        break;
+                    case 2://fire-extinguisher use
+                        System.out.println("FIRE_EXT");
+                        player.state = Player.State.EXTINGUISH;
+                        player.actionTimeRemaining = SMG_USING_TIME;
+                        break;
+                    case 3://medicine use
+                        System.out.println("MEDICINE");
+                        //TODO: use medicine
+                        break;
+                    default:
+                        break;
+                }
+            }
 }

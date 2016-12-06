@@ -17,7 +17,7 @@ public class EnemyAnimation {
     Animation moveDownAnimation;
     Animation moveLeftAnimation;
 
-    float stateTime;
+    float stateTime = 0;
     TextureRegion currentFrame;
 
 
@@ -25,6 +25,7 @@ public class EnemyAnimation {
     final float FRAME_DURATION = 0.5f;
 
     public EnemyAnimation(Texture enemySheet){
+
 
         //50 * int(enemy.currentFrame), 12, 33, 51
 
@@ -95,14 +96,8 @@ public class EnemyAnimation {
         return currentFrame;
     }
 
-    public boolean isSpawnAnimationFinished(){
+    public final boolean isSpawnAnimationFinished(){
         return spawnAnimation.isAnimationFinished(stateTime);
-    }
-
-    public boolean isEnemyDeathAnimationFinished(){
-        //return deathAnimation.isAnimationFinished(stateTime);
-        //System.out.println("Enemy StateTime: " + String.valueOf(stateTime));
-        return stateTime > FRAME_DURATION * DEATH_FRAMES;
     }
 
     private TextureRegion getMoveAnimationFrame(Direction direction){

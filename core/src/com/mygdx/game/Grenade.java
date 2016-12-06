@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
@@ -94,7 +95,7 @@ public class Grenade extends Bullet{
     }
 
     @Override
-    public void update(){
+    public void update(MapObjects solidObjects){
         if(!isDead) {
             updatePosition();
             System.out.println(String.valueOf(rectangle.y) + " " + String.valueOf(startPos.y));

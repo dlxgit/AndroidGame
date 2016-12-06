@@ -30,7 +30,7 @@ public class Assets {
 
     public static final String npcTextureName = "images/npc.png";
     public static final String fireButtonTextureName = "images/fireButton.png";
-
+    public static final String switchButtonTextureName = "images/switchButton.png";
     public static final String bulletTextureName = "images/bullet.png";
 
     public static final String itemsTextureName = "images/items.png";
@@ -112,6 +112,7 @@ public class Assets {
         manager.load(enemyTextureName, Texture.class);
         manager.load(axeEnemyTextureName, Texture.class);
         manager.load(fireButtonTextureName, Texture.class);
+        manager.load(switchButtonTextureName, Texture.class);
 
         manager.load(healthBarBorderFileName, Texture.class);
         manager.load(healthBarLineFileName, Texture.class);
