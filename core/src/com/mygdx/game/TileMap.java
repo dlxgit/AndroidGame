@@ -10,6 +10,7 @@ import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Vector2;
 
 import java.util.Vector;
 
@@ -17,6 +18,7 @@ import java.util.Vector;
  * Created by Andrey on 13.09.2016.
  */
 public class TileMap {
+    public static final float STEP_TILE = 64.f;
     public static final float SCALE = 10.f;
     OrthogonalTiledMapRenderer renderer;
     TiledMap lvl;

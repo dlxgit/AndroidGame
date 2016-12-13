@@ -19,9 +19,9 @@ public class HealthBar {
 
     public HealthBar(Assets assets, Vector2 viewPortCenter){
         healthPercent = 100;
-        barTexture = assets.manager.get(assets.healthBarBorderFileName);
+        barTexture = assets.manager.get(assets.healthBarBorderName);
         bar = new Sprite(barTexture);
-        healthLineTexture = assets.manager.get(assets.healthBarLineFileName);
+        healthLineTexture = assets.manager.get(assets.healthBarLineName);
         healthLine = new Sprite(healthLineTexture);
         setPosition(viewPortCenter);
     }

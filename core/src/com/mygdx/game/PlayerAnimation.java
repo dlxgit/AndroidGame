@@ -5,6 +5,8 @@ package com.mygdx.game;
         import com.badlogic.gdx.graphics.g2d.Animation;
         import com.badlogic.gdx.graphics.g2d.SpriteBatch;
         import com.badlogic.gdx.graphics.g2d.TextureRegion;
+        import com.badlogic.gdx.math.Rectangle;
+        import com.badlogic.gdx.math.Vector2;
 
 /**
  * Created by Andrey on 11.09.2016.
@@ -96,6 +98,8 @@ public class PlayerAnimation {
         TextureRegion[][] fireExtinguisherSplitted = fireExtinguisherRegion.split(15, 16);
         fireExtinguisherAnimation = new Animation(0.1f, fireExtinguisherSplitted[0]);
 
+
+
 /*
         bulletRegion = new TextureRegion(playerSheet, 258, 510, 48, 21).split(16,21)[0];
 
@@ -104,6 +108,34 @@ public class PlayerAnimation {
         TextureRegion[][] bulletAnimationSplitted = bulletAnimationRegion.split(16, 21);
         bulletDestroyAnimation = new Animation(0.1f, bulletAnimationSplitted[0]);
         */
+    }
+
+    Rectangle getExtinguisherRectangle(Direction dir, Rectangle playerRect) {
+        Vector2 frameSize = new Vector2(fireExtinguisherAnimation.getKeyFrame(0).getRegionWidth(),fireExtinguisherAnimation.getKeyFrame(0).getRegionHeight());
+        //Vector2 framePosition = Bullet.getExtinguisherRectangle(direction, playerRect, frameSize);
+        Vector2 playerCenter = new Vector2(playerRect.getCenter(new Vector2()));
+
+        System.out.println("DIRRRRR: " + dir.toString());
+        Vector2 pos = new Vector2();
+        switch (dir) {
+            case UP:
+                pos = new Vector2(playerRect.x + playerRect.width / 2 + frameSize.x / 2, playerRect.y + playerRect.height);
+                break;
+            case DOWN:case NONE:
+                pos = new Vector2(playerRect.x + playerRect.width / 2 + frameSize.x / 2, playerRect.y - frameSize.y);
+                break;
+            case LEFT:
+            case UPLEFT:
+            case DOWNLEFT:
+                pos =  new Vector2(playerRect.x - frameSize.x, playerRect.y + playerRect.height / 2 - frameSize.y / 2);
+                break;
+            case RIGHT:
+            case UPRIGHT:
+            case DOWNRIGHT:
+                pos =  new Vector2(playerRect.x + playerRect.width, playerRect.y + playerRect.height / 2 - frameSize.y / 2);
+                break;
+        }
+        return new Rectangle(pos.x, pos.y, frameSize.x, frameSize.y);
     }
 
     public TextureRegion getCurrentFrame(Player.State playerState, Direction playerLastDirection, float stateTime) {
@@ -154,7 +186,6 @@ public class PlayerAnimation {
             case LEFT:case UPLEFT:case DOWNLEFT:
                 return moveLeftAnimation.getKeyFrame(time, true);
         }
-        System.out.println("HHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHHH");
 
         return moveDownAnimation.getKeyFrame(0, true);
     }

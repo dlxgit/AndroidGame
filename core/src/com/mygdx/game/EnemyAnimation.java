@@ -77,6 +77,7 @@ public class EnemyAnimation {
     protected void update(Enemy.State state, Direction direction) {
         //System.out.println("EnemyState: " + state.toString());
 
+        stateTime += Gdx.graphics.getDeltaTime();
         switch (state) {
             case SPAWN:
                 currentFrame = spawnAnimation.getKeyFrame(stateTime, false);

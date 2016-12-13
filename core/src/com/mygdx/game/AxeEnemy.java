@@ -38,15 +38,20 @@ public class AxeEnemy extends Enemy{
         System.out.println("Health: " + health);
         State lastState = state;
 
-
-
         switch(state){
             case MOVE:
+                if(health <= 0) {
+                    state = State.DEAD;
+                }
                 updateEnemyDirection(player.rectangle);
                 updatePositionByCountingCollision(solidObjects);
-                //updatePosition();
+
                 break;
             case ATTACK:
+                if(health <= 0) {
+                    state = State.DEAD;
+                }
+                System.out.println("AttackCooldown " + attackCooldown);
                 updateEnemyDirection(player.rectangle);
                 if(attackCooldown > 0){
                     //System.out.println("Enemy attack on cooldown, HERO HEALTH: " + player.health);
@@ -56,21 +61,17 @@ public class AxeEnemy extends Enemy{
                     //PROCESS DAMAGE
                     attackCooldown = ATTACK_COOLDOWN;
                     //System.out.println("Enemy attack success");
-                    player.getDamage(ATTACK_DAMAGE);
+                    player.takeDamage(ATTACK_DAMAGE);
                 }
                 break;
             case DEAD:
+                System.out.println("Println");
                 if(isDeathAnimationFinished()){
                     state = State.EXPLODED;
                 }
                 break;
             default:
                 break;
-        }
-
-        if(isDying()){ //if is now dying
-            System.out.println("Enemy DEAD");
-            state = State.DEAD;
         }
 
         //System.out.println("Enemy TIME: " + String.valueOf(animation.stateTime));
@@ -84,13 +85,26 @@ public class AxeEnemy extends Enemy{
 
     @Override
     public void render(SpriteBatch batch){
-        batch.draw(animation.getCurrentFrame(), rectangle.getX(), rectangle.getY());
+        if(state == State.ATTACK && attackCooldown > 1.5 || state != State.ATTACK){
+                batch.draw(animation.getCurrentFrame(state, direction), rectangle.getX(), rectangle.getY());
+        }
+        else batch.draw(animation.getCurrentFrame(state.MOVE, direction), rectangle.getX(), rectangle.getY());
     }
 
     @Override
     public boolean isDeathAnimationFinished(){
-        return state == State.DEAD && animation.deathAnimation.getKeyFrameIndex(animation.stateTime) == animation.deathAnimation.getKeyFrames().length - 1;
+        return animation.deathAnimation.getKeyFrameIndex(animation.stateTime) == animation.deathAnimation.getKeyFrames().length - 1;
 
-        //if(state == State.DEAD && animation.stateTime > animation.deathAnimation.getFrameDuration() * animation.deathAnimation.getKeyFrameIndex())
+        //if(state == State.DEAD && animation.stateTime > animation.animation.getFrameDuration() * animation.animation.getKeyFrameIndex())
+    }
+
+    @Override
+    public float getStateTime(){
+        return animation.stateTime;
+    }
+
+    @Override
+    public void setStateTime(float time){
+        animation.stateTime = time;
     }
 }

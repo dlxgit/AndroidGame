@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
@@ -42,9 +43,6 @@ public class Player extends Entity {
     Direction lastDirection;
     State state;
 
-    boolean isBeastForm; //TODO: убрать поле и в месте проверки героя на состояние зверя проверять float beastTimerRemaining > 0;
-
-
     float itemCooldown;
     float ammo;
 
@@ -66,12 +64,20 @@ public class Player extends Entity {
         moveSpeed = defaultMoveSpeed;
     }
 
-    public void render(Batch batch) {
+    public void render(SpriteBatch batch) {
         //batch.draw(texture,actorX,actorY);
         //sprite.draw(batch);
         batch.draw(animation.getCurrentFrame(state, lastDirection, stateTime), rectangle.x, rectangle.y);
+        if(state == State.EXTINGUISH){
+            renderExtinguisher(batch);
+        }
     }
     //sprite.draw(batch);
+    private void renderExtinguisher(SpriteBatch batch){
+        Rectangle rect = animation.getExtinguisherRectangle(lastDirection, rectangle);
+        batch.draw(animation.getExtinguisherAnimation(stateTime), rect.getX(), rect.getY());
+        //System.out.println("RenderingExt: " + rect.toString() + " " + rectangle.toString());
+    }
 
     public void updatePosition(TouchPad touchPad) {
         //sprite.setPosition(sprite.getX() + touchPad.getDeltaDistance().x * moveSpeed, sprite.getY() + touchPad.getDeltaDistance().y * moveSpeed);
@@ -173,7 +179,6 @@ public class Player extends Entity {
             float angle = v.angle();
             int sidePart = (int) ((angle + 45) / 90);
             direction = Direction.intToDirection(sidePart);
-            System.out.println("Dir: " + direction.toString());
         }
 
         if(direction != Direction.NONE){
@@ -182,6 +187,7 @@ public class Player extends Entity {
     }
 
     public void update(TouchPad touchPad, MapObjects solidObjects){
+        System.out.println("PlayerState: " + state.toString());
         //System.out.println("LastDir: " + lastDirection.toString());
         //updatePosition(touchPad);
         if(itemCooldown > 0){
@@ -198,8 +204,8 @@ public class Player extends Entity {
             updatePositionByCountingCollision(solidObjects);
             //updatePosition(touchPad);
         }
-        System.out.println(lastDirection.toString());
-        System.out.println(state.toString());
+        //System.out.println(lastDirection.toString());
+        //System.out.println(state.toString());
 
         stateTime += Gdx.graphics.getDeltaTime();
     }
@@ -209,9 +215,9 @@ public class Player extends Entity {
     }
 
 
-    public void getDamage(float damage){
+    public void takeDamage(float damage){
         //health -= damage;
-        //state = State.DAMAGED;
+        state = State.DAMAGED;
         stateTime = 0;
     }
 }

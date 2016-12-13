@@ -2,15 +2,12 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
-import java.util.Vector;
+import java.util.Random;
 
 /**
  * Created by Andrey on 06.09.2016.
@@ -77,27 +74,35 @@ public class Enemy extends Entity {
 
         switch(state){
             case SPAWN:
+                if(health <= 0) {
+                    state = State.DEAD;
+                }
                 if(animation.isSpawnAnimationFinished()) {
                     direction = Direction.DOWN;
                     state = State.MOVE;
                 }
                 break;
             case MOVE:
+                if(health <= 0) {
+                    state = State.DEAD;
+                }
                 updateEnemyDirection(player.rectangle);
                 updatePositionByCountingCollision(solidObjects);
                 //updatePosition();
                 break;
             case ATTACK:
+                if(health <= 0) {
+                    state = State.DEAD;
+                }
                 updateEnemyDirection(player.rectangle);
                 if(attackCooldown > 0){
-                    //System.out.println("Enemy attack on cooldown, HERO HEALTH: " + player.health);
                     attackCooldown -= Gdx.graphics.getDeltaTime();
                 }
                 else{
                     //PROCESS DAMAGE
                     attackCooldown = ATTACK_COOLDOWN;
                     //System.out.println("Enemy attack success");
-                    player.getDamage(ATTACK_DAMAGE);
+                    player.takeDamage(ATTACK_DAMAGE);
                 }
                 break;
             case DEAD:
@@ -110,23 +115,13 @@ public class Enemy extends Entity {
                 break;
         }
 
-        if (isDying()) {
-            System.out.println("Enemy DEAD");
-            state = State.DEAD;
-        }
-
-        //System.out.println("Enemy TIME: " + String.valueOf(animation.stateTime));
         if(lastState != state){
-            //System.out.println("Reset");
             animation.stateTime = 0;
         }
         animation.update(state, direction);
     }
 
     public void render(SpriteBatch batch){
-        //batch.draw(texture,actorX,actorY);
-        //sprite.draw(batch);
-
         batch.draw(animation.getCurrentFrame(), rectangle.x, rectangle.y);
     }
 
@@ -153,7 +148,15 @@ public class Enemy extends Entity {
         //calculate distance and direction
         Vector2 distance = calculateDistance(playerRect);
         if(overlaps(playerRect)){
-            state = State.ATTACK;
+            if(state == state.ATTACK){
+                if(getStateTime() < 0.5) {
+                    state = State.ATTACK;
+                }
+                else state = State.MOVE;
+            }
+            if(state == state.MOVE){
+                state = State.ATTACK;
+            }
         }
         else{
             if(state == State.ATTACK){
@@ -170,7 +173,6 @@ public class Enemy extends Entity {
             //TODO: check left-right direction zombie sprite bug (almost)
             if ((distance.x > 3 && distance.y > 3) && (distance.x / distance.y > 0.9) && (distance.y / distance.x < 1.1))
             {
-                //System.out.println("111111111111");
                 if (playerRect.x >= rectangle.x && playerRect.y <= rectangle.y)
                     direction = Direction.DOWNRIGHT;
                 else if (playerRect.x >= rectangle.x && playerRect.y > rectangle.y)
@@ -182,7 +184,6 @@ public class Enemy extends Entity {
             }
             else if (distance.x >= distance.y)
             {
-                //System.out.println("2222222222");
                 if (playerRect.x > rectangle.x)
                     direction = Direction.RIGHT;
                 else
@@ -190,7 +191,6 @@ public class Enemy extends Entity {
             }
             else if (distance.x < distance.y)
             {
-                //System.out.println("33333333");
                 if (playerRect.y < rectangle.y)
                     direction = Direction.DOWN;
                 else
@@ -208,10 +208,8 @@ public class Enemy extends Entity {
 
     public boolean isAction()
     {
-        //System.out.println(String.valueOf(actionCooldown));
         if(state != State.DEAD && actionCooldown <= 0)
         {
-            //System.out.println("COOLDOWN ZERO");
             actionCooldown = ACTION_COOLDOWN;
             return true;
         }
@@ -222,19 +220,32 @@ public class Enemy extends Entity {
     }
 
     public boolean isDeathAnimationFinished(){
-        //return deathAnimation.isAnimationFinished(stateTime);
-        //System.out.println("Enemy StateTime: " + String.valueOf(stateTime));
         return animation.stateTime > animation.FRAME_DURATION * animation.DEATH_FRAMES;
     }
 
-    public boolean isDying(){
-        if (
-             health <= 0 &&
-            (state == State.MOVE ||
-             state == State.ATTACK ||
-             state == State.SPAWN)){
-            return true;
+    public float getStateTime(){
+        return animation.stateTime;
+    }
+
+    public void setStateTime(float time){
+        animation.stateTime = time;
+    }
+
+    static Rectangle calculateSpawnPosition(Rectangle playerRect, MapObjects solidObjects, Random rand) {
+        return Entity.calculateObjectSpawnPosition(new Vector2(30,50),
+                solidObjects,
+                new Rectangle(playerRect.x - Game.ENEMY_SPAWN_RADIUS.x / 2,
+                            playerRect.y - Game.ENEMY_SPAWN_RADIUS.y / 2,
+                            Game.ENEMY_SPAWN_RADIUS.x,
+                            Game.ENEMY_SPAWN_RADIUS.y),
+                rand);
+    }
+
+    static Enemy createRandomEnemyNearPlayer(Assets assets, Rectangle playerRect, MapObjects solidObjects, Random rand){
+        Vector2 pos = calculateSpawnPosition(playerRect, solidObjects, rand).getPosition(new Vector2());
+        if(rand.nextBoolean()){
+            return new Enemy(pos, assets);
         }
-        return false;
+        else return new AxeEnemy(pos, assets);
     }
 }

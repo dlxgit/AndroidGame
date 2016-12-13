@@ -15,16 +15,17 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class Grenade extends Bullet{
-    public final float MOVE_SPEED = 10;
-    public final float HERO_DAMAGE = 35;
-    float angle;
+    public static final float MOVE_SPEED = 10;
+    public static final float DAMAGE = 35;
+    public static final Vector2 EXPLOSION_RADIUS = new Vector2(100, 100);
     float rotationAngle;
     Vector2 startPos;
+    Sprite sprite;
 
     static Animation deathAnimation;
     float stateTime;
 
-    public Grenade(Assets assets, Rectangle playerRect, Direction playerDirection){
+    public Grenade(Assets assets, Vector2 playerCenter, Direction playerDirection){
         isCollidable = false;
         attackDamage = 150;
         target = Target.ENEMY;
@@ -39,8 +40,7 @@ public class Grenade extends Bullet{
         moveSpeed = 5.f;
         rotationAngle = 0;
         direction = playerDirection;
-        Vector2 playerCenter = new Vector2();
-        playerRect.getCenter(playerCenter);
+
 
         int angle = 0;
         if(playerDirection == Direction.UP){
@@ -53,7 +53,7 @@ public class Grenade extends Bullet{
             angle = 270;
         }
 
-        rectangle = new Rectangle(playerCenter.x - 16 / 2, playerCenter.y - 21 / 2, 16, 21);
+        rectangle = new Rectangle(playerCenter.x +  - 16 / 2, playerCenter.y - 21 / 2, 16, 21);
         //rectangle = enemyRect;
         startPos = new Vector2(rectangle.x, rectangle.y);
 
@@ -101,7 +101,11 @@ public class Grenade extends Bullet{
             System.out.println(String.valueOf(rectangle.y) + " " + String.valueOf(startPos.y));
             if(livingTime > 2){
                 System.out.println("Grenade death");
-                //die();
+                die();
+                rectangle = new Rectangle(rectangle.getX() - EXPLOSION_RADIUS.x / 2,
+                                          rectangle.getY() - EXPLOSION_RADIUS.y / 2,
+                                          EXPLOSION_RADIUS.x,
+                                          EXPLOSION_RADIUS.y);
             }
             sprite.setPosition(rectangle.getX(), rectangle.getY());
         }

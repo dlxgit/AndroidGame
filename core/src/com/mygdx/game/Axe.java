@@ -21,6 +21,7 @@ public class Axe extends Bullet {
     float angle;
     float rotationAngle;
     Vector2 step;
+    Sprite sprite;
 
     public Axe(Assets assets, Rectangle playerRect, Rectangle enemyRect, Direction dir){
         float dx = playerRect.x - enemyRect.x;

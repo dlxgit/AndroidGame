@@ -14,12 +14,18 @@ import java.util.Enumeration;
  */
 
 public class Inventory {
-    Integer ammo[]; //pairs of each item-types and its quantity(ammo - for weapons)
+    Integer ammo[]; //quantity of each item in inventory
 
     private int nItem;
     private float cooldown;
 
-    final int ITEM_AMMO[] = new int[]{12, 6, 50, 1}; //pistol, grenade, fire-ex, medicine
+    final int ITEM_AMMO[] = new int[]{ //ammo that can be given from picking-up loot.
+            12, //pistol
+            6, //grenade,
+            50, //fire-ex
+            1 //medicine
+    };
+
     boolean isChangeAllowed = true;
 
     public Inventory(){
@@ -91,5 +97,9 @@ public class Inventory {
             }
         }
         return nItem;
+    }
+
+    public int getCurrentAmmo(){
+        return ammo[nItem];
     }
 }

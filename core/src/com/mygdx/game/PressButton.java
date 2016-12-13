@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
 /**
@@ -19,9 +20,10 @@ public class PressButton {
         CHANGE_SLOT,
         ESCAPE
     }
-    public static final Vector2 FIRE_BUTTON_POS = new Vector2(1000, 2400);
-    public static final Vector2 CHANGE_SLOT_BUTTON_POS = new Vector2(800, 2400);
-    public static final Vector2 ESCAPE_BUTTON_POS = new Vector2(1500, 2400);
+
+    public static final Vector2 FIRE_BUTTON_POS = new Vector2(1700, 200);
+    public static final Vector2 CHANGE_SLOT_BUTTON_POS = new Vector2(1600, 200);
+    public static final Vector2 ESCAPE_BUTTON_POS = new Vector2(1850, 1000);
 
     Texture texture;
     Sprite sprite;
@@ -42,6 +44,8 @@ public class PressButton {
                 break;
             case ESCAPE:
                 pos = ESCAPE_BUTTON_POS;
+                Texture escapeButtonTexture = assets.manager.get(assets.escapeButtonTextureName);
+                sprite = new Sprite(escapeButtonTexture);
                 break;
         }
 
@@ -49,18 +53,28 @@ public class PressButton {
         isPressed = false;
     }
 
-    public void render(Batch batch){
+    public void render(SpriteBatch batch){
         sprite.draw(batch);
     }
 
     private void updatePressState(){
         Rectangle rect = sprite.getBoundingRectangle();
-        isPressed = rect.contains(Gdx.input.getX() + rect.getWidth(),  Game.MAP_SIZE.y - Gdx.input.getY() + rect.getHeight() / 3);
-//        //        isPressed = sprite.getBoundingRectangle().overlaps(new Rectangle(Gdx.input.getX(),  Game.MAP_SIZE.y - Gdx.input.getY() - sprite.getHeight(), 1, 1));
-//
-//        //isPressed = sprite.getBoundingRectangle().contains(Gdx.input.getX(), Gdx.graphics.getHeight()- Gdx.input.getY());
-        //System.out.println("ButtonSTate: " + sprite.getBoundingRectangle().toString() + " " + (new Rectangle(Gdx.input.getX(), Game.MAP_SIZE.y - Gdx.input.getY(), 1,1)).toString());
-        //System.out.println(isPressed);
+//        isPressed = rect.contains(Gdx.graphics.getWidth() - Gdx.graphics.getWidth() / 2 - Gdx.input.getX() + camPos.x + rect.getWidth(),
+//                camPos.y + (Gdx.graphics.getHeight() / 2 - Gdx.input.getY()) + rect.getHeight() / 3);
+
+
+        Vector2 pos = new Vector2(Gdx.input.getX(),
+                                Gdx.graphics.getHeight()- Gdx.input.getY());
+
+//        Vector2 pos = new Vector2(Gdx.graphics.getWidth() / 2 - Gdx.input.getX() + camPos.x + rect.width,
+//                camPos.y + (Gdx.graphics.getHeight() / 2 - Gdx.input.getY()) + rect.getHeight() / 3);
+
+        isPressed = rect.contains(pos);
+
+        //System.out.println("ButtonPos= " + rect.toString());
+        //System.out.println("PressPos= " + pos.toString());
+//        I/System.out: ButtonPos= [800.0,2620.0,48.0,48.0]
+//        I/System.out: PressPos= (805.0,3118.0)
     }
 
     public boolean isPressed(){
@@ -68,11 +82,13 @@ public class PressButton {
     }
 
     public void update(InputController controller){
-        //System.out.println("CONTAINS!!!!!!!!!!!!!!!!!");
-        if(!controller.isTouched){
-            isPressed = false;
-            return;
+        if(controller.isTouched){
+            updatePressState();
         }
-        updatePressState();
+        else isPressed = false;
+
+        //sprite.setPosition(camPos.x + pos.x - Gdx.graphics.getWidth() / 2 , camPos.y - Gdx.graphics.getHeight() +  pos.y);
+
+
     }
 }

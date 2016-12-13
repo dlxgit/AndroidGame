@@ -1,12 +1,16 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.graphics.g3d.particles.values.RectangleSpawnShapeValue;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 
 import org.w3c.dom.css.Rect;
+
+import java.util.Random;
 
 /**
  * Created by Andrey on 13.09.2016.
@@ -232,4 +236,28 @@ public class Entity {
         //System.out.println("Java nais debug");
         System.out.print("");
     }
+
+
+
+    static Rectangle calculateObjectSpawnPosition(Vector2 objectSize, MapObjects solidObjects, Rectangle mapSector, Random rand){
+        while (true) {
+            Rectangle resultRect = new Rectangle((rand.nextInt((int) (mapSector.width / TileMap.STEP_TILE))) * TileMap.STEP_TILE + mapSector.x,
+                                                (rand.nextInt((int) (mapSector.height / TileMap.STEP_TILE))) * TileMap.STEP_TILE + mapSector.y,
+                                                objectSize.x,
+                                                objectSize.y);
+
+            boolean isPositionFree = true;
+            for (RectangleMapObject rectangleObject : solidObjects.getByType(RectangleMapObject.class)){
+                if (Intersector.overlaps(resultRect, rectangleObject.getRectangle())) {
+                    isPositionFree = false;
+                    break;
+                }
+            }
+            if (isPositionFree) {
+                return resultRect;
+            }
+        }
+    }
+
+
 }

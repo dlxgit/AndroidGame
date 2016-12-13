@@ -3,17 +3,12 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-
-import java.util.Iterator;
-import java.util.Vector;
 
 /**
  * Created by Andrey on 31.08.2016.
@@ -41,51 +36,35 @@ public class Bullet extends Entity {
     boolean isCollidable;
     Animation deathAnimation;
     Sprite sprite;
-
     Target target;
 
     Bullet(){};
 
-    Bullet(Assets assets, Rectangle playerRect, Direction dir){
-        System.out.println("BulletAdd");
-        Texture playerSheet = assets.manager.get(assets.heroTextureName);
-
-        TextureRegion bulletAnimationRegion = new TextureRegion(playerSheet, 322, 510, 32, 21);
+    Bullet(Assets assets, Vector2 playerCenter, Direction dir){
+        Texture playerSheet = assets.manager.get(assets.bulletTextureName);
+        TextureRegion bulletAnimationRegion = new TextureRegion(playerSheet, 0, 0, 96, 21);
         TextureRegion[][] bulletAnimationSplitted = bulletAnimationRegion.split(16, 21);
-        deathAnimation = new Animation(0.1f, bulletAnimationSplitted[0]);
-
-        sprite = new Sprite(new TextureRegion(playerSheet, 213, 158, 14, 14));
+        deathAnimation = new Animation(0.1f, new TextureRegion[]{bulletAnimationSplitted[0][4], bulletAnimationSplitted[0][5]});
+        sprite = new Sprite(new TextureRegion(bulletAnimationRegion, 16 * Direction.getSide(dir), 0, 16, 21));
 
         target = Target.ENEMY;
         attackDamage = 100;
         moveSpeed = 5.f;
         //this.rotationAngle = rotationAngle;
         direction = dir;
-        Vector2 playerCenter = new Vector2();
-        playerRect.getCenter(playerCenter);
+
         isCollidable = true;
-        int angle = 0;
-        if(dir == Direction.UP){
-            angle = 90;
-        }
-        else if (dir == Direction.LEFT){
-            angle = 180;
-        }
-        else if (dir == Direction.DOWN){
-            angle = 270;
-        }
-        sprite.setRotation(angle);
-        rectangle = new Rectangle(playerCenter.x - 16 / 2, playerCenter.y / 2 - 21 / 2, 16, 21);
+
+        rectangle = new Rectangle(playerCenter.x - 16 / 2, playerCenter.y - 21 / 2, 16, 21);
 
         livingTime = 0;
+
         moveSpeed = 8.f;
         isCollision = false;
     }
 
     protected void updatePosition(){
-        //moveRectangle();
-
-        sprite.setPosition(rectangle.getX(), rectangle.getY());
+        moveRectangle();
     }
 
     public void update(MapObjects solidObjects){
@@ -93,7 +72,7 @@ public class Bullet extends Entity {
             updatePositionByCountingCollision(solidObjects);
             //updatePosition();
         }
-        this.livingTime += Gdx.graphics.getDeltaTime();
+        this.livingTime =  livingTime + Gdx.graphics.getDeltaTime();
         //System.out.println("Bullet " + rectangle.x + " " + rectangle.y + " " + direction);
     }
 
@@ -102,13 +81,11 @@ public class Bullet extends Entity {
     }
 
     void render(SpriteBatch batch){
-        //batch.draw(texture,actorX,actorY);
-        //animation.(batch);
-        //System.out.println(String.valueOf(rectangle.x) + " , " + String.valueOf(rectangle.y));
         if(isDead){
             batch.draw(getFrame(), rectangle.getX(), rectangle.getY());
         }
         else{
+            sprite.setPosition(rectangle.getX(), rectangle.getY());
             sprite.draw(batch);
         }
     }
@@ -127,14 +104,14 @@ public class Bullet extends Entity {
     }
 
     boolean isExploded(){
+//        if(isDead){
+//            //System.out.println("BulletDeadTime " + livingTime + " " + DEATH_TIME);
+//        }
         return (!isDead && livingTime > MAX_LIVING_TIME) ||
                 (isDead && livingTime > DEATH_TIME);
     }
 
     boolean isCollisionWithTarget(Rectangle targetRect){
-        if (rectangle.overlaps(targetRect)){
-            return true;
-        }
-        return false;
+        return rectangle.overlaps(targetRect);
     }
 }

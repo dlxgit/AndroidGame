@@ -119,14 +119,23 @@ public class AxeEnemyAnimation {
         return attackTextureRegion[3];
     }
 
-    protected void update(Enemy.State state, Direction direction)
+    public void update(Enemy.State state, Direction direction)
     {
         stateTime += Gdx.graphics.getDeltaTime();
-        updateFrame(state, direction);
+        //updateFrame(state, direction);
     }
 
-    public TextureRegion getCurrentFrame()
+    public TextureRegion getCurrentFrame(Enemy.State state, Direction direction)
     {
-        return currentFrame;
+        //return currentFrame;
+        switch (state) {
+            case MOVE:
+                return getMoveAnimationFrame(direction);
+            case DEAD:
+                return deathAnimation.getKeyFrame(stateTime, false);
+            case ATTACK:
+                return getAttackFrame(direction);
+        }
+        return getMoveAnimationFrame(Direction.DOWN);
     }
 }
