@@ -12,6 +12,8 @@ package com.mygdx.game;
  * Created by Andrey on 11.09.2016.
  */
 public class PlayerAnimation {
+    public static final float EXTINGUISHER_SPEED = 300.f;
+    public static final float MAX_EXTINGUISH_TIME = 0.2f;
     Animation moveUpAnimation;
     Animation moveRightAnimation;
     Animation moveDownAnimation;
@@ -34,6 +36,7 @@ public class PlayerAnimation {
 
     TextureRegion[] bulletRegion;
     Animation bulletDestroyAnimation;
+    float extinguishTime = 0;
 
 
     public PlayerAnimation(Texture playerSheet) {
@@ -110,33 +113,7 @@ public class PlayerAnimation {
         */
     }
 
-    Rectangle getExtinguisherRectangle(Direction dir, Rectangle playerRect) {
-        Vector2 frameSize = new Vector2(fireExtinguisherAnimation.getKeyFrame(0).getRegionWidth(),fireExtinguisherAnimation.getKeyFrame(0).getRegionHeight());
-        //Vector2 framePosition = Bullet.getExtinguisherRectangle(direction, playerRect, frameSize);
-        Vector2 playerCenter = new Vector2(playerRect.getCenter(new Vector2()));
 
-        System.out.println("DIRRRRR: " + dir.toString());
-        Vector2 pos = new Vector2();
-        switch (dir) {
-            case UP:
-                pos = new Vector2(playerRect.x + playerRect.width / 2 + frameSize.x / 2, playerRect.y + playerRect.height);
-                break;
-            case DOWN:case NONE:
-                pos = new Vector2(playerRect.x + playerRect.width / 2 + frameSize.x / 2, playerRect.y - frameSize.y);
-                break;
-            case LEFT:
-            case UPLEFT:
-            case DOWNLEFT:
-                pos =  new Vector2(playerRect.x - frameSize.x, playerRect.y + playerRect.height / 2 - frameSize.y / 2);
-                break;
-            case RIGHT:
-            case UPRIGHT:
-            case DOWNRIGHT:
-                pos =  new Vector2(playerRect.x + playerRect.width, playerRect.y + playerRect.height / 2 - frameSize.y / 2);
-                break;
-        }
-        return new Rectangle(pos.x, pos.y, frameSize.x, frameSize.y);
-    }
 
     public TextureRegion getCurrentFrame(Player.State playerState, Direction playerLastDirection, float stateTime) {
         switch (playerState) {
@@ -156,8 +133,12 @@ public class PlayerAnimation {
         return new TextureRegion();
     }
 
-    public TextureRegion getExtinguisherAnimation(float stateTime){
-        return fireExtinguisherAnimation.getKeyFrame(stateTime, true);
+    public TextureRegion updateExtinguisherAnimation(){
+        if(extinguishTime > MAX_EXTINGUISH_TIME){
+            extinguishTime = 0;
+        }
+        extinguishTime += Gdx.graphics.getDeltaTime();
+        return fireExtinguisherAnimation.getKeyFrame(extinguishTime, true);
     }
 
     /*

@@ -42,6 +42,9 @@ public class Hud {
 
     public void update(int health, Inventory inventory){
         this.healthBarPercentage = health;
+        if(healthBarPercentage < 0){
+            healthBarPercentage = 0;
+        }
         currentItem = Loot.Type.getType(inventory.getCurrentSlot());
         currentAmmo = inventory.getCurrentAmmo();
     }

@@ -103,47 +103,27 @@ public class Entity {
         return rectangle;
     }
 
-    /*
-    public Rectangle moveRectangle(Direction lastDirection)
-    {
-        switch (lastDirection)
-        {
+    public static Vector2 calculateDeltaDistance(Direction dir, float moveSpeed){
+        float dx = 0;
+        float dy = 0;
+        switch (dir){
             case UP:
-                rectangle.y += moveSpeed;
-                break;
-            case UPRIGHT:
-                rectangle.x += (0.66 * moveSpeed * moveSpeed);
-                rectangle.y += (0.66 * moveSpeed);
+                dy = moveSpeed;
                 break;
             case RIGHT:
-                rectangle.x += moveSpeed;
-                break;
-            case DOWNRIGHT:
-                rectangle.x += (0.66 * moveSpeed * moveSpeed);
-                rectangle.y -= (0.66 * moveSpeed);
+                dx = moveSpeed;
                 break;
             case DOWN:
-                rectangle.y -= moveSpeed;
-                break;
-            case DOWNLEFT:
-                rectangle.x -= (0.66 * moveSpeed * moveSpeed);
-                rectangle.y -= (0.66 * moveSpeed);
+                dy = -moveSpeed;
                 break;
             case LEFT:
-                rectangle.x -= moveSpeed;
-                break;
-            case UPLEFT:
-                rectangle.x -= (0.66 * moveSpeed * moveSpeed);
-                rectangle.y += (0.66 * moveSpeed);
-                break;
-            case NONE:
+                dx = -moveSpeed;
                 break;
             default:
                 break;
         }
-        return rectangle;
+        return new Vector2(dx, dy);
     }
-   */
 
     static boolean IsCollisionWithMap(Rectangle rectangle, MapObjects solid) {
         for (RectangleMapObject rectangleObject : solid.getByType(RectangleMapObject.class)){
@@ -155,49 +135,6 @@ public class Entity {
     }
 
     public void updatePositionByCountingCollision(MapObjects solidObjects) {
-        /*
-//        Rectangle oldRect = rectangle;
-//        Rectangle newRect = moveRectangle(oldRect);
-//
-//        if (IsCollisionWithMap(newRect, solidObjects)) {
-//            if (newRect != oldRect){
-//                rectangle.setPosition(oldRect.x, newRect.y);
-//                if (IsCollisionWithMap(rectangle, solidObjects)) {
-//                    rectangle.setPosition(newRect.x, oldRect.y);
-//                    if (IsCollisionWithMap(rectangle, solidObjects)) {
-//                        rectangle = oldRect;
-//                    }
-//                }
-//            }
-//        }
-
-
-        Rectangle newRect = moveRectangle(rectangle);
-        Vector2 oldPosition = new Vector2(rectangle.getX(), rectangle.getY());
-
-        if (!Entity.IsCollisionWithMap(newRect, solidObjects)) {//try move by x and y
-            System.out.println("case0");
-            rectangle = newRect;
-        }
-        else{//if collision
-            if (newRect != rectangle){//if is moving
-                rectangle.setY(newRect.y);
-                if (Entity.IsCollisionWithMap(rectangle, solidObjects)) {//try move by y
-                    System.out.println("case2");
-                    rectangle.setX(newRect.x);
-                    if (Entity.IsCollisionWithMap(rectangle, solidObjects)) {//try move by x
-                        System.out.println("case3");
-                        rectangle.setPosition(oldPosition);
-                    }
-                }
-                else {
-                    System.out.println("case1");
-                }
-            }
-
-        }
-        System.out.println("Java nais debug");
-        */
         System.out.println("BEFORE: " + rectangle.toString());
         Vector2 oldPosition = new Vector2(rectangle.getX(), rectangle.getY());
         Rectangle rect2 = rectangle;

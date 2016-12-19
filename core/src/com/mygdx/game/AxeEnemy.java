@@ -74,6 +74,10 @@ public class AxeEnemy extends Enemy{
                 break;
         }
 
+        if (player.state == Player.State.EXTINGUISH && player.getExtinguisherRectangle(solidObjects).overlaps(rectangle)) {
+            health -= Game.FIRE_EXTINGUISHER_DAMAGE;
+        }
+
         //System.out.println("Enemy TIME: " + String.valueOf(animation.stateTime));
         if(lastState != state){
             System.out.println("Reset");

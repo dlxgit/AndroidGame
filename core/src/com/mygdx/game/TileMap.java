@@ -28,15 +28,11 @@ public class TileMap {
 
 
     public TileMap(Assets assets, OrthographicCamera camera, int level){
-        //lvl = assets.manager.get(assets.level0FileName, TiledMap.class);
-        //renderer = new OrthogonalTiledMapRenderer(lvl, SCALE);
-        //MapLayer layer = lvl.getLayers().get("Слой объектов 1");
         lvl = new TmxMapLoader().load("levels/level0.tmx");
         renderer = new OrthogonalTiledMapRenderer(lvl);
         renderer.setView(camera);
         renderer.setMap(lvl);
         allObjects = new Vector<MapObject>();
-        //objects = layer.getObjects();
     }
 
     public void update(OrthographicCamera camera){

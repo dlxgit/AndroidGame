@@ -2,9 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.MapObjects;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -15,40 +13,35 @@ import com.badlogic.gdx.scenes.scene2d.ui.Touchpad;
  */
 public class Player extends Entity {
     enum State {
-        INIT,
         MOVE,
-        //TODO: MOVE_FAST,  (убрать из состояний, сделать лишь таймер и увеличение мса x2)
         STAY,
-
         DAMAGED,
-        PICKUP,//
-        RELOAD,//not here
-        DEAD,
-
         SHOOT,
         EXTINGUISH,
         THROW_GRENADE,
     }
 
+    public static float BONUS_DURATION = 10.f;
 
-    PlayerAnimation animation;
+
     public final Vector2 startPos = new Vector2(300, 300);
     public final int defaultMoveSpeed = 10;
-    public final float ITEM_COOLDOWN = 0.5f;
+    public final int BONUS_MOVE_SPEED = 4;
     public final float MAX_HEALTH = 100;
+    public static final float MEDICINE_HEALTH = 30;
 
     Texture texture;
     int health;
-
     Direction lastDirection;
     State state;
+    PlayerAnimation animation;
 
     float itemCooldown;
-    float ammo;
-
     float actionTimeRemaining;
-
+    float bonusTimeRemaining = 0;
     float stateTime = 0;
+    Vector2 extinguisherStartPos;
+    Rectangle extinguisherRect;
 
     public Player(Assets assets) {
         state = State.MOVE;
@@ -59,24 +52,21 @@ public class Player extends Entity {
         rectangle = new Rectangle(startPos.x, Game.MAP_SIZE.y - startPos.y, 19, 36);
         texture = assets.manager.get(assets.heroTextureName);
         animation = new PlayerAnimation(texture);
-        //sprite = new Sprite(texture);
-        //sprite.setPosition(Gdx.graphics.getWidth() / 2 - sprite.getWidth() / 2, Gdx.graphics.getHeight() / 2 - sprite.getHeight() / 2);
         moveSpeed = defaultMoveSpeed;
+        extinguisherRect = new Rectangle();
     }
 
     public void render(SpriteBatch batch) {
-        //batch.draw(texture,actorX,actorY);
-        //sprite.draw(batch);
         batch.draw(animation.getCurrentFrame(state, lastDirection, stateTime), rectangle.x, rectangle.y);
-        if(state == State.EXTINGUISH){
-            renderExtinguisher(batch);
-        }
+        renderExtinguisher(batch);
     }
+
     //sprite.draw(batch);
     private void renderExtinguisher(SpriteBatch batch){
-        Rectangle rect = animation.getExtinguisherRectangle(lastDirection, rectangle);
-        batch.draw(animation.getExtinguisherAnimation(stateTime), rect.getX(), rect.getY());
-        //System.out.println("RenderingExt: " + rect.toString() + " " + rectangle.toString());
+        if(state == State.EXTINGUISH) {
+            batch.draw(animation.updateExtinguisherAnimation(), extinguisherRect.getX(), extinguisherRect.getY());
+        }
+        else animation.extinguishTime = 0;
     }
 
     public void updatePosition(TouchPad touchPad) {
@@ -190,6 +180,11 @@ public class Player extends Entity {
         System.out.println("PlayerState: " + state.toString());
         //System.out.println("LastDir: " + lastDirection.toString());
         //updatePosition(touchPad);
+        if(bonusTimeRemaining > 0) {
+            bonusTimeRemaining -= Gdx.graphics.getDeltaTime();
+        }
+        else moveSpeed = defaultMoveSpeed;
+
         if(itemCooldown > 0){
             itemCooldown -= Gdx.graphics.getDeltaTime();
         }
@@ -204,6 +199,10 @@ public class Player extends Entity {
             updatePositionByCountingCollision(solidObjects);
             //updatePosition(touchPad);
         }
+        if(state == State.EXTINGUISH){
+            extinguisherRect = getExtinguisherRectangle(solidObjects);
+        }
+
         //System.out.println(lastDirection.toString());
         //System.out.println(state.toString());
 
@@ -216,8 +215,57 @@ public class Player extends Entity {
 
 
     public void takeDamage(float damage){
-        //health -= damage;
+        health -= damage;
         state = State.DAMAGED;
         stateTime = 0;
+    }
+
+    public void useMedicine(){
+        health += MEDICINE_HEALTH;
+        if(health > 100){
+            health = 100;
+        }
+    }
+
+    public void activateSpeedBonus(){
+        moveSpeed += BONUS_MOVE_SPEED;
+        bonusTimeRemaining = BONUS_DURATION;
+    }
+
+    void setExtinguisherPosition(){
+        Vector2 frameSize = new Vector2(animation.fireExtinguisherAnimation.getKeyFrame(0).getRegionWidth(), animation.fireExtinguisherAnimation.getKeyFrame(0).getRegionHeight());
+        switch (lastDirection) {
+            case UP:
+                extinguisherStartPos = new Vector2(rectangle.x + rectangle.width / 2 + frameSize.x / 2, rectangle.y + rectangle.height);
+                break;
+            case DOWN:case NONE:
+                extinguisherStartPos = new Vector2(rectangle.x + rectangle.width / 2 + frameSize.x / 2, rectangle.y - frameSize.y);
+                break;
+            case LEFT:
+            case UPLEFT:
+            case DOWNLEFT:
+                extinguisherStartPos =  new Vector2(rectangle.x - frameSize.x, rectangle.y + rectangle.height / 2 - frameSize.y / 2);
+                break;
+            case RIGHT:
+            case UPRIGHT:
+            case DOWNRIGHT:
+                extinguisherStartPos =  new Vector2(rectangle.x + rectangle.width, rectangle.y + rectangle.height / 2 - frameSize.y / 2);
+                break;
+        }
+    }
+
+    Rectangle getExtinguisherRectangle(MapObjects solid) {
+        Vector2 frameSize = new Vector2(animation.fireExtinguisherAnimation.getKeyFrame(0).getRegionWidth(), animation.fireExtinguisherAnimation.getKeyFrame(0).getRegionHeight());
+        Vector2 deltaDistance = Entity.calculateDeltaDistance(lastDirection, animation.EXTINGUISHER_SPEED);
+        Rectangle resultRect = new Rectangle(extinguisherStartPos.x + deltaDistance.x * animation.extinguishTime,
+                                             extinguisherStartPos.y + deltaDistance.y * animation.extinguishTime,
+                                             frameSize.x,
+                                             frameSize.y);
+
+        if(Entity.IsCollisionWithMap(resultRect, solid)){
+            animation.extinguishTime = 0;
+            resultRect.setPosition(extinguisherStartPos);
+        }
+        return resultRect;
     }
 }

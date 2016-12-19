@@ -49,7 +49,12 @@ public class Assets {
     public static final String healthBarBorderName = "images/healthBarBorder.png";
     public static final String healthBarLineName = "images/healthBarLine.png";
 
+    public static final String startButtonName = "images/startGameButton.png";
+    public static final String quitButtonName = "images/quitGameButton.png";
+    public static final String pauseButtonName = "images/pauseButton.png";
+
     public static final String fontName = "font/arialbd.ttf";
+    public static final String gameOverScreenName = "images/gameOverScreen.png";
 
     private BitmapFont font;
 
@@ -120,12 +125,20 @@ public class Assets {
         manager.load(bulletTextureName, Texture.class);
         manager.load(fireButtonTextureName, Texture.class);
         manager.load(switchButtonTextureName, Texture.class);
+
         manager.load(escapeButtonTextureName, Texture.class);
+        manager.load(startButtonName, Texture.class);
+        manager.load(quitButtonName, Texture.class);
+        manager.load(pauseButtonName, Texture.class);
+
 
         manager.load(healthBarBorderName, Texture.class);
         manager.load(healthBarLineName, Texture.class);
         manager.load(npcTextureName, Texture.class);
         manager.load(itemsTextureName, Texture.class);
+
+        manager.load(gameOverScreenName, Texture.class);
+
     }
 
     public void loadFont(){

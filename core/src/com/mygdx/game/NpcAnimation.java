@@ -26,7 +26,7 @@ public class NpcAnimation {
     float stateTime;
 
 
-    public Rectangle getNpcImageRectangle(Npc.Type type, int frameIndex){
+    public static Rectangle getNpcImageRectangle(Npc.Type type, int frameIndex){
         switch(type){
             case PHOTOGRAPHS:
                 return new Rectangle(41 * frameIndex, 350, 41, 50);

@@ -115,6 +115,10 @@ public class Enemy extends Entity {
                 break;
         }
 
+        if (player.state == Player.State.EXTINGUISH && player.getExtinguisherRectangle(solidObjects).overlaps(rectangle)) {
+            health -= Game.FIRE_EXTINGUISHER_DAMAGE;
+        }
+
         if(lastState != state){
             animation.stateTime = 0;
         }
@@ -208,13 +212,14 @@ public class Enemy extends Entity {
 
     public boolean isAction()
     {
-        if(state != State.DEAD && actionCooldown <= 0)
+        if(state != State.DEAD && state != State.EXPLODED && actionCooldown <= 0)
         {
             actionCooldown = ACTION_COOLDOWN;
             return true;
         }
         return false;
     }
+
     public void setActionCooldown(){
         actionCooldown = ACTION_COOLDOWN;
     }

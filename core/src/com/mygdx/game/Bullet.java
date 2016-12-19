@@ -38,7 +38,8 @@ public class Bullet extends Entity {
     Sprite sprite;
     Target target;
 
-    Bullet(){};
+    Bullet(){
+    };
 
     Bullet(Assets assets, Vector2 playerCenter, Direction dir){
         Texture playerSheet = assets.manager.get(assets.bulletTextureName);

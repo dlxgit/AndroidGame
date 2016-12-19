@@ -81,12 +81,18 @@ To do:
 
 /*
     доработать огнетушитель (координаты дыма + отдалять и приближать дым по мере нажатия)
-    разобраться почему герой умирает при закомменченой строчке player.health -= damage;
-
-    реализовать функции: определения точки спавна врагов (рядом с игроком) + рандомный тип врага, + спавн лута
 
  */
 
+
+//пуля не удаляется после попадания в киайца
+
+//сделать рекорды + как цель - спасти больше npc, второй параметр: как можно быстрее.
+//сделать спавн npc Случайным? (генерация уровня), тем самым будет 1 уровень, и целью будет поставить рекорд, спася больше npc, и за меньшее время.
+//сделать счетчик времени на экране
+
+//огнетушитель менять дистанцию + !!не коцает врагов?
+//
 
 public class Game extends ApplicationAdapter {
     enum State {
@@ -110,7 +116,7 @@ public class Game extends ApplicationAdapter {
     //time need to pass after using smg - to run after using it
     static final float SMG_USING_TIME = 0.5f;
     static final float GRENADE_THROW_ACTION_TIME = 0.5f;
-    static final float FIRE_EXTINGUISHER_DAMAGE = 10f;
+    static final float FIRE_EXTINGUISHER_DAMAGE = 50f;
     Assets assets;
     State state;
     private OrthographicCamera camera;
@@ -125,6 +131,9 @@ public class Game extends ApplicationAdapter {
     PressButton fireButton;
     PressButton changeSlotButton;
     PressButton escapeButton;
+    PressButton startButton;
+    PressButton quitButton;
+    PressButton pauseButton;
 
     Player player;
     InputMultiplexer multiplexer;
@@ -137,76 +146,76 @@ public class Game extends ApplicationAdapter {
     Vector<Loot> lootList;
 
     Inventory inventory;
-
     TileMap map;
-
     HealthBar healthBar;
-
     BitmapFont font;
-
     ShapeRenderer shapeRenderer;
-
     Viewport viewport;
-
     MapObjects solidObjects;
     Hud hud;
 
+    Texture gameOverTexture;
     @Override
     public void create() {
         aspectRatio = (float) Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
         GAMEWORLD_SIZE = new Vector2(aspectRatio * 3200, 3200);
-
         camera = new OrthographicCamera(GAMEWORLD_SIZE.x, GAMEWORLD_SIZE.y);
         camera.position.set(GAMEWORLD_SIZE.x / 2 - 1700, GAMEWORLD_SIZE.y / 2 + 1080, 0);
-        //viewport = new FitViewport(1920, 1080, camera);
-        //viewport = new FitViewport(1280, 1024, camera);
         viewport = new FitViewport(1920, 1080, camera);
         viewport.apply();
-        //viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        //camera = new OrthographicCamera();
-
-        //camera.setToOrtho(false, 10f * aspectRatio, 10f);
-        //camera.setToOrtho(false, 3200 * aspectRatio, 3200);
-        //camera.setToOrtho(true, Gdx.graphics.getWidth(),0);
-        //camera.setToOrtho(true, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-
-
-        //stage = new Stage(new StretchViewport(3200, 3200));
         stage = new Stage(new StretchViewport(1920, 1024));
         touchPad = new TouchPad();
         touchPad.create();
         stage.addActor(touchPad.getTouchpad());
-
         inputController = new InputController();
         multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
         multiplexer.addProcessor(inputController);
-        //Gdx.input.setInputProcessor(stage);
         Gdx.input.setInputProcessor(multiplexer);
 
-
-        survivedNpcs = 0;
         shapeRenderer = new ShapeRenderer();
-
         assets = new Assets();
 
+        bulletList = new Vector<Bullet>();
+        enemyList = new Vector<Enemy>();
+        lootList = new Vector<Loot>();
+        inventory = new Inventory();
+        npcList = new Vector<Npc>();
+
+        batch = new SpriteBatch();
+        hudBatch = new SpriteBatch();
+        map = new TileMap(assets, camera, 0);
+
+        fireButton = new PressButton(assets, PressButton.Type.FIRE);
+        changeSlotButton = new PressButton(assets, PressButton.Type.CHANGE_SLOT);
+        escapeButton = new PressButton(assets, PressButton.Type.ESCAPE);
+        startButton = new PressButton(assets, PressButton.Type.START);
+        pauseButton = new PressButton(assets, PressButton.Type.PAUSE);
+        quitButton = new PressButton(assets, PressButton.Type.QUIT);
+
+        rnd = new Random();
+
+        healthBar = new HealthBar(assets, new Vector2(30, 400));
+
+        //state = State.PLAY;
+        state = State.MENU;
+
+        font = assets.manager.get("font/testFont.fnt", BitmapFont.class);
+        gameOverTexture = assets.manager.get(assets.gameOverScreenName);
+    }
+
+    void initializeWorld() {
+        survivedNpcs = 0;
         gameTime = 0;
 
         bulletList = new Vector<Bullet>();
         enemyList = new Vector<Enemy>();
-
         lootList = new Vector<Loot>();
-
         inventory = new Inventory();
-
-        Texture npcTexture = assets.manager.get(assets.npcTextureName);
         npcList = new Vector<Npc>();
-        //npcList = initializeNpc(npcTexture);
+        npcList = initializeNpc();
 
-
-        batch = new SpriteBatch();
-        hudBatch = new SpriteBatch();
         map = new TileMap(assets, camera, 0);
 
         player = new Player(assets);
@@ -214,20 +223,17 @@ public class Game extends ApplicationAdapter {
         fireButton = new PressButton(assets, PressButton.Type.FIRE);
         changeSlotButton = new PressButton(assets, PressButton.Type.CHANGE_SLOT);
         escapeButton = new PressButton(assets, PressButton.Type.ESCAPE);
+        startButton = new PressButton(assets, PressButton.Type.START);
+        pauseButton = new PressButton(assets, PressButton.Type.PAUSE);
+        quitButton = new PressButton(assets, PressButton.Type.QUIT);
 
-        //stage = new Stage(new StretchViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
-
-        //Gdx.input.setInputProcessor();
         rnd = new Random();
-
         healthBar = new HealthBar(assets, new Vector2(30, 400));
 
         lootList.add(new Loot(assets, Loot.Type.SMG, new Vector2(200, 1500 + 1200)));
         lootList.add(new Loot(assets, Loot.Type.FIRE_EXTINGUISHER, new Vector2(200, 1600 + 1200)));
         lootList.add(new Loot(assets, Loot.Type.GRENADE, new Vector2(200, 1700 + 1200)));
-        state = State.PLAY;
-
-        font = assets.manager.get("font/testFont.fnt", BitmapFont.class);
+        //state = State.PLAY;
 
         solidObjects = map.lvl.getLayers().get("solid").getObjects();
         hud = new Hud(assets);
@@ -236,18 +242,11 @@ public class Game extends ApplicationAdapter {
     @Override
     public void render() {
         //Gdx.gl.glClearColor(1, 0, 0, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        //Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         switch (state) {
             case PLAY:
-                updateCamera();
+
                 this.update();
-                map.update(camera);
-                //System.out.println("State: " + player.state.toString() + " dir: " + player.direction.toString() + " lastDir: " + player.lastDirection.toString());
-//				System.out.println("PlayerState: " + player.state.toString());
-//				System.out.println("Survived Npcs: " + String.valueOf(survivedNpcs));
-//				System.out.println("Inventory index: " + String.valueOf(inventory.getCurrentSlot()));
-//				System.out.println("AMMO: " + String.valueOf(inventory.ammo[inventory.getCurrentSlot()]));
-                stage.act(Gdx.graphics.getDeltaTime());
                 renderGame();
 
                 System.out.println("____________");
@@ -256,14 +255,10 @@ public class Game extends ApplicationAdapter {
                 renderGame();
                 break;
             case END:
-//                if(gotoMenuButton.isPressed()){
-//                    state = State.MENU;
-//                }
+                onGameOver();
                 break;
             case MENU:
-//                if(startButton.isPressed()){
-//                    state = State.PLAY;
-//                }
+                onMenu();
                 break;
             default:
                 break;
@@ -279,7 +274,38 @@ public class Game extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
-        img.dispose();
+        //dispose();
+    }
+
+
+    private void onMenu(){
+        startButton.update(inputController);
+        quitButton.update(inputController);
+        if(startButton.isPressed()){
+            state = State.PLAY;
+            initializeWorld();
+        }
+        else if(quitButton.isPressed()){
+            dispose();
+        }
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        hudBatch.begin();
+        startButton.render(hudBatch);
+        quitButton.render(hudBatch);
+        hudBatch.end();
+    }
+
+    private void onPause(){
+
+    }
+
+    private void onGameOver(){
+        if(inputController.isTouched){
+            state = State.MENU;
+        }
+        hudBatch.begin();
+        hudBatch.draw(gameOverTexture, Gdx.graphics.getWidth() / 2 - gameOverTexture.getWidth() / 2, Gdx.graphics.getHeight() / 2 - gameOverTexture.getHeight() / 2);
+        hudBatch.end();
     }
 
     private void updateCamera(){
@@ -314,25 +340,12 @@ public class Game extends ApplicationAdapter {
         renderLoot();
         renderBullets();
 
-
         healthBar.render(batch);
-        renderUI(batch);
-
-//                if (player.state == Player.State.EXTINGUISH) {
-//                    TextureRegion sprite = player.animation.getExtinguisherAnimation(player.stateTime);
-//                    Vector2 pos = getExtinguisherRectangle(player.direction, player.rectangle, sprite);
-//                    batch.draw(sprite, pos.x, pos.y);
-//                }
-
-        //renderShape(player.rectangle);
-        //renderShape(new Rectangle(0,0, 100, 100));
-        //renderShape(new Rectangle(320.5f, 190.5f, 383.5f, 47f));
-
-        //renderShape(fireButton.sprite.getBoundingRectangle());
 
         batch.end();
 
         hudBatch.begin();
+        renderUI(hudBatch);
         fireButton.render(hudBatch);
         changeSlotButton.render(hudBatch);
         escapeButton.render(hudBatch);
@@ -343,6 +356,7 @@ public class Game extends ApplicationAdapter {
     }
 
     public void update() {
+        updateCamera();
         gameTime += Gdx.graphics.getDeltaTime();
         //System.out.println("gameTime " + String.valueOf(gameTime));
 
@@ -371,6 +385,8 @@ public class Game extends ApplicationAdapter {
 
         healthBar.update((int) (player.health / player.MAX_HEALTH * 100), new Vector2(30, 400));
         hud.update(player.health, inventory);
+        map.update(camera);
+        stage.act(Gdx.graphics.getDeltaTime());
     }
 
     public void updateBullets() {
@@ -405,11 +421,6 @@ public class Game extends ApplicationAdapter {
 
             //checking collision with enemies (grenades+bullets)
             for (Enemy enemy : enemyList) {
-                //checkExtinguish
-                if (player.state == Player.State.EXTINGUISH && player.animation.getExtinguisherRectangle(player.lastDirection, player.rectangle).overlaps(enemy.rectangle)) {
-                    enemy.health -= FIRE_EXTINGUISHER_DAMAGE;
-                }
-
                 if (bullet.isCollisionWithTarget(enemy.rectangle)) {
                     System.out.println("bullet intersects with enemy");
 
@@ -428,16 +439,12 @@ public class Game extends ApplicationAdapter {
     void checkEnemySpawn() {
         if (enemyList.size() < ENEMY_MAX_QUANTITY && (enemyList.isEmpty() || enemyList.lastElement().livingTime > 2)) {
             enemyList.add(Enemy.createRandomEnemyNearPlayer(assets, new Rectangle(camera.position.x, camera.position.y, 30, 30), solidObjects, rnd));
-            //enemyList.add(new AxeEnemy(new Vector2(player.rectangle.x + 200, player.rectangle.y), assets));
-            //enemyList.add(new AxeEnemy(new Vector2(rnd.nextInt(Gdx.graphics.getWidth() + 1), rnd.nextInt(Gdx.graphics.getHeight() + 1)), assets));
-            System.out.println("Enemy spawn");
-        }
+       }
     }
 
     void checkLootSpawn() {
         if (lootList.size() < Loot.MAX_QUANTITY) {
             lootList.add(Loot.createLoot(assets, solidObjects, rnd));
-            System.out.println("Loot spawn");
         }
     }
 
@@ -452,7 +459,6 @@ public class Game extends ApplicationAdapter {
                 bulletList.add(new Axe(assets, player.rectangle, enemy.rectangle, enemy.direction));
             }
 
-            System.out.println("EnemyState :  " + enemy.state.toString());
             if (enemy.state == Enemy.State.EXPLODED) {
                 it.remove();
             }
@@ -492,7 +498,7 @@ public class Game extends ApplicationAdapter {
             if (loot.rectangle.overlaps(player.rectangle)) {
                 //itemPickUp
                 if (loot.type == Loot.Type.SPEED_BONUS) {
-                    System.out.println("Taking speed_bonus");
+                    player.activateSpeedBonus();
                 } else {
                     inventory.takeItem(loot.type.ordinal());
                 }
@@ -542,7 +548,8 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    public Vector<Npc> initializeNpc(Texture texture) {
+    public Vector<Npc> initializeNpc() {
+        Texture texture = assets.manager.get(assets.npcTextureName);
         Vector<Npc> npcList = new Vector<Npc>();
         npcList.add(new Npc(texture, Npc.Type.PHOTOGRAPHS, 5 * 48, 8 * 48));
         npcList.add(new Npc(texture, Npc.Type.BABY, 50 * 48, 10 * 48));
@@ -553,12 +560,14 @@ public class Game extends ApplicationAdapter {
         npcList.add(new Npc(texture, Npc.Type.SEARCHER, 55 * 48, 4 * 48));
         npcList.add(new Npc(texture, Npc.Type.COOK, 20 * 48, 14 * 48));
         npcList.add(new Npc(texture, Npc.Type.GIRL, 15 * 48, 6 * 48));
+
         return npcList;
     }
 
     public void renderUI(SpriteBatch batch) {
-        font.setColor(255f, 255f, 255f, 0);
-        font.draw(batch, "Ammo: " + String.valueOf(player.ammo), 400, 500);
+        font.setColor(1f, 1f, 1f, 0);
+
+        font.draw(batch, "Ammo: " + String.valueOf(inventory.getCurrentAmmo()), 400, 500);
     }
 
     public void handleInventory() {
@@ -575,25 +584,24 @@ public class Game extends ApplicationAdapter {
                 System.out.println("ITEM_USING_ ");
                 switch (inventory.getCurrentSlot()) {
                     case 0://smg shot
-                        System.out.println("SMG SHOT");
                         bulletList.add(new Bullet(assets, player.rectangle.getCenter(new Vector2()), player.lastDirection));
                         player.state = Player.State.SHOOT;
                         player.actionTimeRemaining = SMG_USING_TIME;
                         break;
                     case 1://grenade throw
-                        System.out.println("GRENADE");
                         player.state = Player.State.THROW_GRENADE;
                         bulletList.add(new Grenade(assets, player.rectangle.getCenter(new Vector2()), player.lastDirection));
                         player.actionTimeRemaining = GRENADE_THROW_ACTION_TIME;
                         break;
                     case 2://fire-extinguisher use
-                        System.out.println("FIRE_EXT");
                         player.state = Player.State.EXTINGUISH;
                         player.actionTimeRemaining = SMG_USING_TIME;
+                        player.setExtinguisherPosition();
                         break;
                     case 3://medicine use
-                        System.out.println("MEDICINE");
-                        //TODO: use medicine
+                        if(inventory.getCurrentAmmo() > 0) {
+                            player.useMedicine();
+                        }
                         break;
                     default:
                         break;

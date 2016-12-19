@@ -23,22 +23,19 @@ public class Npc extends  Entity{
         DEAD_NPC
     }
 
-
     public Npc(Texture texture, Npc.Type type, float posX, float posY){
         this.isLiving = true;
         this.type = type;
-        this.position = new Vector2(posX,posY);
+        this.position = new Vector2(posX, Game.MAP_SIZE.y - posY);
         this.animation = new NpcAnimation(texture);
 
         this.rectangle = animation.getNpcImageRectangle(type, 0);
-        this.rectangle.setPosition(posX, posY);
+        this.rectangle.setPosition(posX, Game.MAP_SIZE.y - posY);
     }
-
 
     Vector2 position;
     NpcAnimation animation;
     boolean isLiving;
-
     Type type;
 
     public boolean isLiving(){
