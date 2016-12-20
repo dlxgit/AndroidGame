@@ -10,8 +10,7 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class Npc extends  Entity{
-
-    public static enum Type {
+    public enum Type {
         PHOTOGRAPHS,
         BABY,
         TEACHER,
@@ -23,6 +22,12 @@ public class Npc extends  Entity{
         DEAD_NPC
     }
 
+    Vector2 position;
+    NpcAnimation animation;
+    boolean isLiving;
+    Type type;
+
+
     public Npc(Texture texture, Npc.Type type, float posX, float posY){
         this.isLiving = true;
         this.type = type;
@@ -33,17 +38,11 @@ public class Npc extends  Entity{
         this.rectangle.setPosition(posX, Game.MAP_SIZE.y - posY);
     }
 
-    Vector2 position;
-    NpcAnimation animation;
-    boolean isLiving;
-    Type type;
-
     public boolean isLiving(){
         return isLiving;
     }
 
     public void die(){
-        System.out.println("DYING");
         isLiving = false;
         animation.stateTime = 0;
     }

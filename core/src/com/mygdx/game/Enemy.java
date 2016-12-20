@@ -16,54 +16,33 @@ public class Enemy extends Entity {
     enum State{
         SPAWN,
         MOVE,
-        STAY,
         ATTACK,
-        //DAMAGED,
-        CAST,
         DEAD,
         EXPLODED
     }
 
-    public final float VISION_DISTANCE = 300.f;
     public final float ATTACK_COOLDOWN = 2.f;
     public final float ATTACK_DAMAGE = 30;
     public final int ACTION_COOLDOWN = 5;
 
     State state;
-    //public static final float MAX_LIVING_TIME = 5.f;
-    //Texture texture;
-    //Sprite sprite;
     float livingTime;
     public float actionCooldown = 1;
-
     float attackCooldown;
-
     EnemyAnimation animation;
 
-    Enemy(){
-
-    };
+    Enemy(){};
 
     public Enemy(Vector2 position, Assets assets){
         moveSpeed = 3.f;
         Texture texture = assets.manager.get(assets.enemyTextureName);
-        //sprite = new Sprite(texture);
         rectangle = new Rectangle(position.x, position.y, 27, 49);
         animation = new EnemyAnimation(texture);
         state = State.SPAWN;
         livingTime = 0;
-        //pos = new Vector2(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        //sprite.setPosition(position.x, position.y);
         health = 100;
         attackCooldown = 0;
         direction = Direction.NONE;
-    }
-
-    protected void updatePosition(){
-        //sprite.setPosition((float) (sprite.getX() + (moveSpeed * Math.cos((rotationAngle) * Math.PI / 180))),
-        //        (float) (sprite.getY() + (moveSpeed * Math.sin((rotationAngle) * Math.PI / 180))));
-        //rectangle.setPosition(rectangle.x + touchPad.getDeltaDistance().x * moveSpeed, rectangle.y + touchPad.getDeltaDistance().y * moveSpeed);
-        moveRectangle();
     }
 
     public void update(Player player, MapObjects solidObjects, Assets assets) {
@@ -89,7 +68,6 @@ public class Enemy extends Entity {
                 }
                 updateEnemyDirection(player.rectangle);
                 updatePositionByCountingCollision(solidObjects);
-                //updatePosition();
                 break;
             case ATTACK:
                 if(health <= 0) {
@@ -99,10 +77,9 @@ public class Enemy extends Entity {
                 if(attackCooldown > 0){
                     attackCooldown -= Gdx.graphics.getDeltaTime();
                 }
-                else{
-                    //PROCESS DAMAGE
+                else{  //deal damage
+
                     attackCooldown = ATTACK_COOLDOWN;
-                    //System.out.println("Enemy attack success");
                     player.takeDamage(ATTACK_DAMAGE, assets);
                 }
                 break;
@@ -128,18 +105,6 @@ public class Enemy extends Entity {
         batch.draw(animation.getCurrentFrame(), rectangle.x, rectangle.y);
     }
 
-
-    private boolean isNearPlayer(Rectangle playerRect){
-        Vector2 distance = calculateDistance(playerRect);
-        if(distance.x < VISION_DISTANCE && distance.y < VISION_DISTANCE) {
-            return true;
-        }
-        return false;
-    }
-
-    private void follow(Rectangle playerRect){
-
-    }
 
     Vector2 calculateDistance(Rectangle playerRect){
         Vector2 distance = new Vector2( Math.abs(playerRect.x - rectangle.x),
@@ -229,10 +194,6 @@ public class Enemy extends Entity {
 
     public float getStateTime(){
         return animation.stateTime;
-    }
-
-    public void setStateTime(float time){
-        animation.stateTime = time;
     }
 
     static Rectangle calculateSpawnPosition(Rectangle playerRect, MapObjects solidObjects, Random rand) {

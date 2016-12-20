@@ -15,13 +15,13 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class Axe extends Bullet {
-
+    public static final float ROTATE_INTERVAL = 0.2f;
     public final float MOVE_SPEED = 10;
-    public final float HERO_DAMAGE = 35;
     float angle;
     float rotationAngle;
     Vector2 step;
     Sprite sprite;
+    float lastRotateTime;
 
     public Axe(Assets assets, Rectangle playerRect, Rectangle enemyRect, Direction dir){
         float dx = playerRect.x - enemyRect.x;
@@ -32,7 +32,6 @@ public class Axe extends Bullet {
         isCollidable = true;
         Texture bulletTexture = assets.manager.get(assets.axeEnemyTextureName);
         sprite = new Sprite(bulletTexture, 117, 18, 16, 16);
-        //sprite.setOrigin(sprite.getOriginX() + sprite.getWidth() / 2, sprite.getOriginY() + sprite.getHeight() / 2);
         target = Target.PLAYER;
 
         double A;
@@ -40,36 +39,17 @@ public class Axe extends Bullet {
         if(A < 0){
             A = A + 360;
         }
-
         angle = (float)A;
-
-        //angle = new Vector2(playerRect.getX() - enemyRect.getX(), playerRect.getY() - enemyRect.getY()).angle();
         attackDamage = 50;
         moveSpeed = 5.f;
         rotationAngle = 0;
         direction = dir;
-        Vector2 playerCenter = new Vector2();
-        playerRect.getCenter(playerCenter);
-
-        int angle = 0;
-        if(dir == Direction.UP){
-            angle = 90;
-        }
-        else if (dir == Direction.LEFT){
-            angle = 180;
-        }
-        else if (dir == Direction.DOWN){
-            angle = 270;
-        }
-
-        //TODO: старт позиция в зависимости от направления
         rectangle = new Rectangle(enemyRect.x, enemyRect.y, 16, 21);
-        //rectangle = enemyRect;
-
         livingTime = 0;
         moveSpeed = 8.f;
         isDead = false;
         isCollision = false;
+        lastRotateTime = 0;
     }
 
     @Override
@@ -85,20 +65,19 @@ public class Axe extends Bullet {
             if(isCollision){
                 die();
             }
-            //updatePosition();
             sprite.setPosition(rectangle.getX(), rectangle.getY());
-            //sprite.rotate90(true);
         }
         this.livingTime += Gdx.graphics.getDeltaTime();
+        sprite.setOrigin(sprite.getX() + sprite.getWidth() / 2, sprite.getY() - sprite.getHeight() / 2);
+        if(this.livingTime < lastRotateTime + ROTATE_INTERVAL) {
+            sprite.rotate90(false);
+            lastRotateTime = livingTime;
+        }
     }
 
     @Override
     public void render(SpriteBatch batch){
         sprite.draw(batch);
-    }
-
-    static float calculateAngle(Rectangle rect1, Rectangle rect2){
-        return new Vector2(rect1.getX() - rect2.getX(), rect1.getY() - rect2.getY()).angle();
     }
 
     @Override

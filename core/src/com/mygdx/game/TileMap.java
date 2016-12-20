@@ -22,11 +22,9 @@ public class TileMap {
     public static final float SCALE = 10.f;
     OrthogonalTiledMapRenderer renderer;
     TiledMap lvl;
-//    Vector<MapObject> allObjects;
-//    Vector<MapObject> solidObjects;
     int nLevel;
 
-    public TileMap(Assets assets, OrthographicCamera camera, int level){
+    public TileMap(OrthographicCamera camera, int level){
         lvl = new TmxMapLoader().load("levels/level" + String.valueOf(level) + ".tmx");
         renderer = new OrthogonalTiledMapRenderer(lvl);
         renderer.setView(camera);
@@ -39,22 +37,10 @@ public class TileMap {
     }
 
     public void render(SpriteBatch batch){
-        //int[] backgroundLayers = { 0, 1 }; // don't allocate every frame!
-        //int[] foregroundLayers = { 2 };
-        //TiledMapTileLayer layer = (TiledMapTileLayer)lvl.getLayers().get(0);
-
-/*
-        for(MapObject obj : lvl.getLayers().get("solid").getObjects()){
-            renderer.renderObject(obj);
-        }
-
-        lvl.getTileSets();
-        */
-
-        /*for(MapObject obj : lvl.getLayers().get(0).getObjects()){
-            renderer.renderObject(obj);
-        }*/
-        //batch.draw(lvl.getLayers().get("solid").getObjects().get(0).);
         renderer.render();
+    }
+
+    public void dispose(){
+        lvl.dispose();
     }
 }

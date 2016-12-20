@@ -107,7 +107,6 @@ public class Game extends ApplicationAdapter {
     static final int NPC_MAX_QUANTITY = 1;
     static final Vector2 ENEMY_SPAWN_RADIUS = new Vector2(400, 400);
     static final Vector2 MAP_SIZE = new Vector2(3200, 3200);
-    final Vector2 VIEWPORT_SIZE = new Vector2(1280, 1024);
     float aspectRatio;
     Vector2 GAMEWORLD_SIZE;
 
@@ -145,13 +144,11 @@ public class Game extends ApplicationAdapter {
     Inventory inventory;
     TileMap map;
     HealthBar healthBar;
-    BitmapFont font;
     ShapeRenderer shapeRenderer;
     Viewport viewport;
     MapObjects solidObjects;
     Hud hud;
-    Texture gameOverTexture;
-    Texture levelFinishTexture;
+
 
     @Override
     public void create() {
@@ -183,7 +180,7 @@ public class Game extends ApplicationAdapter {
 
         batch = new SpriteBatch();
         hudBatch = new SpriteBatch();
-        map = new TileMap(assets, camera, 0);
+        map = new TileMap(camera, 0);
 
         fireButton = new PressButton(assets, PressButton.Type.FIRE);
         changeSlotButton = new PressButton(assets, PressButton.Type.CHANGE_SLOT);
@@ -196,15 +193,7 @@ public class Game extends ApplicationAdapter {
 
         state = State.MENU;
 
-        font = assets.manager.get("font/testFont.fnt", BitmapFont.class);
-        gameOverTexture = assets.manager.get(assets.gameOverScreenName);
-        levelFinishTexture = assets.manager.get(assets.levelFinishName);
         hud = new Hud(assets);
-//        fireButton = new PressButton(assets, PressButton.Type.FIRE);
-//        changeSlotButton = new PressButton(assets, PressButton.Type.CHANGE_SLOT);
-//        startButton = new PressButton(assets, PressButton.Type.START);
-//        quitButton = new PressButton(assets, PressButton.Type.QUIT);
-        //healthBar = new HealthBar(assets, new Vector2(30, 400));
         assets.menuMusic.play();
     }
 
@@ -219,12 +208,11 @@ public class Game extends ApplicationAdapter {
         npcList = new Vector<Npc>();
         npcList = initializeNpc();
 
-        map = new TileMap(assets, camera, level);
+        map = new TileMap(camera, level);
         player = new Player(assets);
         rnd = new Random();
 
         solidObjects = map.lvl.getLayers().get("solid").getObjects();
-        //hud = new Hud(assets);
         if(level == 0){
             assets.level0Music.play();
         }
@@ -235,8 +223,6 @@ public class Game extends ApplicationAdapter {
 
     @Override
     public void render() {
-        //Gdx.gl.glClearColor(1, 0, 0, 1);
-        //Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         switch (state) {
             case PLAY:
                 this.update();
@@ -259,15 +245,13 @@ public class Game extends ApplicationAdapter {
 
     @Override
     public void resize(int width, int height) {
-        //viewport.update(width, height);
-        //camera.position.set(GAMEWORLD_SIZE.x / 2, GAMEWORLD_SIZE.y / 2, 0);
     }
 
     @Override
     public void dispose() {
         batch.dispose();
-        assets.manager.dispose();
-        map.lvl.dispose();
+        assets.dispose();
+        map.dispose();
     }
 
     private void onMenu(){
@@ -291,6 +275,7 @@ public class Game extends ApplicationAdapter {
 
     private void onLevelComplete() {
         if (inputController.isTouched) {
+            map.dispose();
             if(map.nLevel == 0){
                 state = State.PLAY;
                 initializeWorld(1);
@@ -303,7 +288,7 @@ public class Game extends ApplicationAdapter {
             }
         }
         hudBatch.begin();
-        hudBatch.draw(levelFinishTexture, Gdx.graphics.getWidth() / 2 - levelFinishTexture.getWidth() / 2, Gdx.graphics.getHeight() / 2 - levelFinishTexture.getHeight() / 2);
+        hudBatch.draw(assets.levelFinishTexture, Gdx.graphics.getWidth() / 2 - assets.levelFinishTexture.getWidth() / 2, Gdx.graphics.getHeight() / 2 - assets.levelFinishTexture.getHeight() / 2);
         hudBatch.end();
     }
 
@@ -312,29 +297,26 @@ public class Game extends ApplicationAdapter {
             state = State.MENU;
         }
         hudBatch.begin();
-        hudBatch.draw(gameOverTexture, Gdx.graphics.getWidth() / 2 - gameOverTexture.getWidth() / 2, Gdx.graphics.getHeight() / 2 - gameOverTexture.getHeight() / 2);
+        hudBatch.draw(assets.gameOverTexture, Gdx.graphics.getWidth() / 2 - assets.gameOverTexture.getWidth() / 2, Gdx.graphics.getHeight() / 2 - assets.gameOverTexture.getHeight() / 2);
         hudBatch.end();
     }
 
     private void updateCamera(){
         camera.update();
         camera.position.set(player.rectangle.x, player.rectangle.y, 0);
-        //System.out.println()
-        if (camera.position.x > 2220)
+        if (camera.position.x > 2220) {
             camera.position.x = 2220;
-        else if (camera.position.x < Gdx.graphics.getWidth() / 2)
+        }
+        else if (camera.position.x < Gdx.graphics.getWidth() / 2) {
             camera.position.x = Gdx.graphics.getWidth() / 2 + 50;
-
-        System.out.println("CAMERA_POS!!!" + camera.position.x + " " + camera.position.y);
-        System.out.println("PlayerPos " + player.rectangle.toString());
-        if (camera.position.y > 2660)
+        }
+        if (camera.position.y > 2660) {
             camera.position.y = 2660;
-        if (camera.position.y < 2010)
+        }
+        else if (camera.position.y < 2010) {
             camera.position.y = 2010;
-//                if(camera.position.x> GAMEWORLD_SIZE.x - VIEWPORT_SIZE.x / 2) camera.position.x=GAMEWORLD_SIZE.x - VIEWPORT_SIZE.x / 2;
-//                else if(camera.position.x<Gdx.graphics.getWidth() / 2)camera.position.x = Gdx.graphics.getWidth() / 2;
+        }
         viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        //camera.zoom += 0.1;
         batch.setProjectionMatrix(camera.combined);
     }
 
@@ -343,41 +325,33 @@ public class Game extends ApplicationAdapter {
         map.render(batch);
 
         batch.begin();
-
         touchPad.render();
         player.render(batch);
         renderEnemies();
         renderNpcs();
         renderLoot();
         renderBullets();
-
         healthBar.render(batch);
-
         batch.end();
 
         hudBatch.begin();
-        renderUI(hudBatch);
         fireButton.render(hudBatch);
         changeSlotButton.render(hudBatch);
-        hud.render(hudBatch, font);
+        hud.render(hudBatch);
         hudBatch.end();
 
         stage.draw();
     }
 
     public void update() {
-        updateCamera();
         gameTime += Gdx.graphics.getDeltaTime();
-        //System.out.println("gameTime " + String.valueOf(gameTime));
 
+        updateCamera();
         player.update(touchPad, solidObjects);
-        //System.out.println(player.lastDirection.toString());
         fireButton.update(inputController);
         changeSlotButton.update(inputController);
-        //updateButtonState(changeSlotButton);
         checkEnemySpawn();
         checkLootSpawn();
-
         handleInventory();
 
         updateBullets();
@@ -392,7 +366,6 @@ public class Game extends ApplicationAdapter {
             state = State.END;
             return;
         }
-
         healthBar.update((int)(player.health / player.MAX_HEALTH * 100), new Vector2(30, 400));
         hud.update(player.health, inventory);
         map.update(camera);
@@ -416,37 +389,26 @@ public class Game extends ApplicationAdapter {
             bullet.update(solidObjects);
 
             if (bullet.isExploded()) {//if bullet finished its deathanimation(bullet explosion/grenade explosion)
-                System.out.println("Bullet explosion(remove)");
                 it.remove();
                 continue;
             }
-
             if (bullet.getTarget() == Bullet.Target.PLAYER) { //axe
                 if (bullet.isCollisionWithTarget(player.rectangle)) {
                     player.takeDamage(bullet.attackDamage, assets);
-                    System.out.println("BulletRemoveAfterHittingPlayer" + bullet.livingTime);
                     it.remove();
                 }
-//                else if(isCollisionWithMap(bullet.rectangle)){
-//                    it.remove();
-//                }
                 continue;
             }
-
             if (!bullet.isDead() && bullet.isCollidable) {//bullet
                 if (bullet.isCollision) {
                     bullet.die();
                     continue;
                 }
             }
-
             //checking collision with enemies (grenades+bullets)
             for (Enemy enemy : enemyList) {
                 if (bullet.isCollisionWithTarget(enemy.rectangle)) {
-                    System.out.println("bullet intersects with enemy");
-
                     if (bullet.isCollidable && !bullet.isDead()) { //if bullet - remove enemy and stop checking others.
-                        System.out.println("BulletRemove_@@@@@@@@@@@@@@@@@@@ " + bullet.livingTime);
                         bullet.isCollision = true;
                         enemy.health -= bullet.attackDamage;
                         break;
@@ -480,7 +442,6 @@ public class Game extends ApplicationAdapter {
                 enemy.setActionCooldown();
                 bulletList.add(new Axe(assets, player.rectangle, enemy.rectangle, enemy.direction));
             }
-
             if (enemy.state == Enemy.State.EXPLODED) {
                 it.remove();
             }
@@ -494,7 +455,6 @@ public class Game extends ApplicationAdapter {
             npc.update();
 
             if (!npc.isLiving()) {
-                System.out.println("Npc Death stateTime: " + String.valueOf(npc.animation.stateTime));
                 if (npc.animation.isDeathAnimationFinished()) {
                     it.remove();
                 }
@@ -508,7 +468,6 @@ public class Game extends ApplicationAdapter {
 
             for (Enemy enemy : enemyList) {
                 if (npc.rectangle.overlaps(enemy.rectangle)) {
-                    System.out.println("NPC_TOUCH_ENEMY!!");
                     npc.die();
                     assets.npcDeathSound.play();
                 }
@@ -519,8 +478,7 @@ public class Game extends ApplicationAdapter {
     public void updateLoot() {
         for (Iterator<Loot> it = lootList.iterator(); it.hasNext(); ) {
             Loot loot = it.next();
-            if (loot.rectangle.overlaps(player.rectangle)) {
-                //itemPickUp
+            if (loot.rectangle.overlaps(player.rectangle)) { //itemPickUp
                 assets.takeItemSound.play();
                 if (loot.type == Loot.Type.SPEED_BONUS) {
                     player.activateSpeedBonus();
@@ -532,19 +490,6 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-	public void renderShape(Rectangle rect) {
-		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-		shapeRenderer.setColor(Color.RED);
-		shapeRenderer.rect(rect.x, rect.y, rect.width, rect.height);
-
-		shapeRenderer.end();
-//		shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-//		shapeRenderer.setColor(Color.RED);
-//		shapeRenderer.rect(100, 100, 500, 500);
-//
-//		shapeRenderer.end();
-	}
-
     public void renderBullets() {
         for (Bullet bullet : bulletList) {
             bullet.render(batch);
@@ -553,17 +498,13 @@ public class Game extends ApplicationAdapter {
 
     public void renderEnemies() {
         for (Enemy enemy : enemyList) {
-            //enemy.animation.update(enemy.state, enemy.direction);
             enemy.render(batch);
-            //renderShape(enemy.rectangle);
         }
     }
 
     public void renderNpcs() {
         for (Npc npc : npcList) {
-            //npc.animation.getCurrentFrame(npc.state);
             npc.render(batch);
-            //renderShape(npc.rectangle);
         }
     }
 
@@ -578,7 +519,6 @@ public class Game extends ApplicationAdapter {
         Vector<Npc> npcList = new Vector<Npc>();
         npcList.add(new Npc(texture, Npc.Type.PHOTOGRAPHS, 5 * 48, 8 * 48));
         npcList.add(new Npc(texture, Npc.Type.BABY, 48 * 48, 10 * 48));
-
         npcList.add(new Npc(texture, Npc.Type.TEACHER, 9 * 48, 15 * 48));
         npcList.add(new Npc(texture, Npc.Type.DOG, 53 * 48, 15 * 48));
         npcList.add(new Npc(texture, Npc.Type.SOLDIER, 28 * 48, 28 * 48));
@@ -587,12 +527,6 @@ public class Game extends ApplicationAdapter {
         npcList.add(new Npc(texture, Npc.Type.GIRL, 15 * 48, 6 * 48));
 
         return npcList;
-    }
-
-    public void renderUI(SpriteBatch batch) {
-        font.setColor(1f, 1f, 1f, 0);
-
-        font.draw(batch, "Ammo: " + String.valueOf(inventory.getCurrentAmmo()), 400, 500);
     }
 
     public void handleInventory() {
@@ -606,7 +540,6 @@ public class Game extends ApplicationAdapter {
         if (fireButton.isPressed() && (player.state == Player.State.MOVE || player.state == Player.State.STAY)) {
 
             if (inventory.useItem()) {
-                System.out.println("ITEM_USING_ ");
                 switch (inventory.getCurrentSlot()) {
                     case 0://smg shot
                         bulletList.add(new Bullet(assets, player.rectangle.getCenter(new Vector2()), player.lastDirection));
@@ -624,7 +557,7 @@ public class Game extends ApplicationAdapter {
                         player.actionTimeRemaining = SMG_USING_TIME;
                         player.setExtinguisherPosition();
                         break;
-                    case 3://medicine use
+                    case 3://health bonus use
                         if(inventory.getCurrentAmmo() > 0) {
                             player.useMedicine();
                             assets.takeItemSound.play();

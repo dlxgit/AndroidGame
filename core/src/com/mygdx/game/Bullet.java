@@ -26,16 +26,13 @@ public class Bullet extends Entity {
 
     Texture texture;
     float livingTime;
-    float rotationAngle;
     boolean isDead = false;
     boolean isCollidable;
     Animation deathAnimation;
     Sprite sprite;
     Target target;
 
-    Bullet(){
-
-    };
+    Bullet(){};
 
     Bullet(Assets assets, Vector2 playerCenter, Direction dir){
         Texture playerSheet = assets.manager.get(assets.bulletTextureName);
@@ -47,32 +44,25 @@ public class Bullet extends Entity {
         target = Target.ENEMY;
         attackDamage = 100;
         moveSpeed = 15.f;
-        //this.rotationAngle = rotationAngle;
         direction = dir;
-
         isCollidable = true;
-
-        rectangle = new Rectangle(playerCenter.x - 16 / 2, playerCenter.y - 21 / 2, 16, 21);
-
         livingTime = 0;
-
         isCollision = false;
+        rectangle = new Rectangle(playerCenter.x - 16 / 2, playerCenter.y - 21 / 2, 16, 21);
     }
 
     protected void updatePosition(){
         moveRectangle();
     }
 
-    public void update(MapObjects solidObjects){
+    void update(MapObjects solidObjects){
         if(!isDead) {
             updatePositionByCountingCollision(solidObjects);
-            //updatePosition();
         }
         this.livingTime =  livingTime + Gdx.graphics.getDeltaTime();
-        //System.out.println("Bullet " + rectangle.x + " " + rectangle.y + " " + direction);
     }
 
-    public TextureRegion getFrame() {
+    TextureRegion getFrame() {
         return deathAnimation.getKeyFrame(livingTime, false);
     }
 
@@ -86,7 +76,7 @@ public class Bullet extends Entity {
         }
     }
 
-    public boolean isDead(){
+    boolean isDead(){
         return isDead;
     }
 
@@ -100,9 +90,6 @@ public class Bullet extends Entity {
     }
 
     boolean isExploded(){
-//        if(isDead){
-//            //System.out.println("BulletDeadTime " + livingTime + " " + DEATH_TIME);
-//        }
         return (!isDead && livingTime > MAX_LIVING_TIME) ||
                 (isDead && livingTime > DEATH_TIME);
     }

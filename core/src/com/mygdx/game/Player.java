@@ -56,68 +56,13 @@ public class Player extends Entity {
         extinguisherRect = new Rectangle();
     }
 
+
     public void render(SpriteBatch batch) {
         batch.draw(animation.getCurrentFrame(state, lastDirection, stateTime), rectangle.x, rectangle.y);
         renderExtinguisher(batch);
     }
 
-    //sprite.draw(batch);
-    private void renderExtinguisher(SpriteBatch batch){
-        if(state == State.EXTINGUISH) {
-            batch.draw(animation.updateExtinguisherAnimation(), extinguisherRect.getX(), extinguisherRect.getY());
-        }
-        else animation.extinguishTime = 0;
-    }
-
-    public void updatePosition(TouchPad touchPad) {
-        //sprite.setPosition(sprite.getX() + touchPad.getDeltaDistance().x * moveSpeed, sprite.getY() + touchPad.getDeltaDistance().y * moveSpeed);
-        rectangle.setPosition(rectangle.x + touchPad.getDeltaDistance().x * moveSpeed, rectangle.y + touchPad.getDeltaDistance().y * moveSpeed);
-        //moveRectangle(touchPad.getDeltaDistance().x * moveSpeed,touchPad.getDeltaDistance().x * moveSpeed);
-    }
-
     public void updateState() {
-        /*
-
-
-        if(state == State.THROW_GRENADE){
-            if(animation.throwGrenadeUpAnimation.isAnimationFinished(animation.stateTime)){
-                state = State.STAY;
-            }
-            return;
-        }
-        else if (state == State.SHOOT || state == State.EXTINGUISH){
-            float angle = v.angle();
-            int sidePart = (int) ((angle + 45) / 90);
-            //direction = Direction.intToDirection(sidePart);
-            //lastDirection = direction;
-            return;
-        }
-
-        if(state == State.DAMAGED){
-            if(animation.damagedAnimation.isAnimationFinished(animation.stateTime)){
-                System.out.println("DAMAGE_ANIMATION_FINISHED!");
-                state = State.MOVE;
-            }
-        }
-        if(Math.abs(v.x) < 0.2 && Math.abs(v.y) < 0.2){
-            //direction = Direction.NONE;
-            if(state != State.DAMAGED) {
-                state = Player.State.STAY;
-            }
-            return;
-        }
-        else if (state != State.DAMAGED){
-            state = Player.State.MOVE;
-        }
-
-        float angle = v.angle();
-        int sidePart = (int) ((angle + 45) / 90);
-        direction = Direction.intToDirection(sidePart);
-
-        if(state == Player.State.MOVE){
-            lastDirection = direction;
-        }
-        */
 
         switch (state) {
             case DAMAGED:
@@ -128,7 +73,6 @@ public class Player extends Entity {
                 break;
             case MOVE:
                 if (direction == Direction.NONE) {
-                    //direction = Direction.NONE;
                     state = Player.State.STAY;
                 }
                 break;
@@ -143,10 +87,6 @@ public class Player extends Entity {
                 }
                 break;
             case EXTINGUISH:
-                //if(//extinguishAnimation.hasFinished?){
-                    //state = State.STAY;
-                //}
-                //if firebutton.ispressed() == false state = STAY;
                 if(actionTimeRemaining < 0){
                     state = State.STAY;
                 }
@@ -161,8 +101,6 @@ public class Player extends Entity {
 
     public void updateDirection(Touchpad touchpad){
         Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
-        //System.out.println("KNOB: " + String.valueOf(v.x) + " " + String.valueOf(v.y));
-
         if(Math.abs(v.x) < 0.2 && Math.abs(v.y) < 0.2) {
             direction = Direction.NONE;
         }else{
@@ -177,9 +115,6 @@ public class Player extends Entity {
     }
 
     public void update(TouchPad touchPad, MapObjects solidObjects){
-        System.out.println("PlayerState: " + state.toString());
-        //System.out.println("LastDir: " + lastDirection.toString());
-        //updatePosition(touchPad);
         if(bonusTimeRemaining > 0) {
             bonusTimeRemaining -= Gdx.graphics.getDeltaTime();
         }
@@ -197,22 +132,13 @@ public class Player extends Entity {
 
         if(state == State.MOVE){
             updatePositionByCountingCollision(solidObjects);
-            //updatePosition(touchPad);
         }
         if(state == State.EXTINGUISH){
             extinguisherRect = getExtinguisherRectangle(solidObjects);
         }
 
-        //System.out.println(lastDirection.toString());
-        //System.out.println(state.toString());
-
         stateTime += Gdx.graphics.getDeltaTime();
     }
-
-    public Direction getLastDirection(){
-        return lastDirection;
-    }
-
 
     public void takeDamage(float damage, Assets assets){
         health -= damage;
@@ -268,5 +194,12 @@ public class Player extends Entity {
             resultRect.setPosition(extinguisherStartPos);
         }
         return resultRect;
+    }
+
+    private void renderExtinguisher(SpriteBatch batch){
+        if(state == State.EXTINGUISH) {
+            batch.draw(animation.updateExtinguisherAnimation(), extinguisherRect.getX(), extinguisherRect.getY());
+        }
+        else animation.extinguishTime = 0;
     }
 }

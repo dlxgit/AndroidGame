@@ -16,7 +16,6 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Grenade extends Bullet{
     public static final float MOVE_SPEED = 15;
-    public static final float DAMAGE = 35;
     public static final Vector2 EXPLOSION_RADIUS = new Vector2(100, 100);
     float rotationAngle;
     Vector2 startPos;
@@ -56,10 +55,10 @@ public class Grenade extends Bullet{
     public void updatePosition(){
         switch (direction){
             case UP:
-                rectangle.y += MOVE_SPEED / 4;
+                rectangle.y += MOVE_SPEED / 10;
                 break;
             case DOWN:
-                rectangle.y -= MOVE_SPEED / 4;
+                rectangle.y -= MOVE_SPEED / 10;
                 break;
             case RIGHT:
                 rectangle.y = startPos.y + (float) (- 3 * Math.pow((livingTime * 2 - 1.8),2) + 9) * MOVE_SPEED;
@@ -78,7 +77,6 @@ public class Grenade extends Bullet{
             updatePosition();
             System.out.println(String.valueOf(rectangle.y) + " " + String.valueOf(startPos.y));
             if(livingTime > 1.65){
-                System.out.println("Grenade death");
                 die();
                 rectangle = new Rectangle(rectangle.getX() - EXPLOSION_RADIUS.x / 2,
                                           rectangle.getY() - EXPLOSION_RADIUS.y / 2,
@@ -96,12 +94,10 @@ public class Grenade extends Bullet{
 
     @Override
     public void render(SpriteBatch batch){
-        if(!isDead){
-            System.out.println("Throw Grenade");
+        if(!isDead){ //draw grenade
             sprite.draw(batch);
         }
-        else {
-            System.out.println("Grenade Explosion");
+        else { //draw explosion
             batch.draw(deathAnimation.getKeyFrame(stateTime), rectangle.x, rectangle.y);
         }
     }

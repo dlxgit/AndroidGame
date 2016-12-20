@@ -18,17 +18,15 @@ public class Loot {
     public enum Type{
         SMG(0),
         GRENADE(1),
-        FIRE_EXTINGUISHER(2), //not added yet
+        FIRE_EXTINGUISHER(2),
         MEDICINE(3),
         SPEED_BONUS(4);
 
         private int val;
-
         private Type(int val) {
 
             this.val = val;
         }
-
         public static Type getType(int val){
             switch(val){
                 case 0:
@@ -61,12 +59,8 @@ public class Loot {
         this.region = new TextureRegion(texture, (int)(type.val * IMAGE_SIZE.x), 0, (int)IMAGE_SIZE.x, (int)IMAGE_SIZE.y);
     }
 
-    void update(){
-    }
-
     void render(SpriteBatch batch){
         batch.draw(region, rectangle.getX(), rectangle.getY());
-        //batch.draw(texture, rectangle.x, rectangle.y, rectangle.width, rectangle.height);
     }
 
     static Rectangle calculateSpawnPosition(MapObjects solidObjects, Random rand) {

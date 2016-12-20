@@ -24,10 +24,8 @@ public class PressButton {
 
     public static final Vector2 FIRE_BUTTON_POS = new Vector2(1600, 200);
     public static final Vector2 CHANGE_SLOT_BUTTON_POS = new Vector2(1400, 200);
-
     public static final Vector2 START_BUTTON_POS = new Vector2(1920 / 2 - 640 / 2, 1080 / 2 + 30);
     public static final Vector2 QUIT_BUTTON_POS = new Vector2(1920 / 2 - 640 / 2, 1080 / 2 - 250);
-
 
     Texture texture;
     Sprite sprite;
@@ -69,22 +67,9 @@ public class PressButton {
 
     private void updatePressState(){
         Rectangle rect = sprite.getBoundingRectangle();
-//        isPressed = rect.contains(Gdx.graphics.getWidth() - Gdx.graphics.getWidth() / 2 - Gdx.input.getX() + camPos.x + rect.getWidth(),
-//                camPos.y + (Gdx.graphics.getHeight() / 2 - Gdx.input.getY()) + rect.getHeight() / 3);
-
-
         Vector2 pos = new Vector2(Gdx.input.getX(),
                                 Gdx.graphics.getHeight()- Gdx.input.getY());
-
-//        Vector2 pos = new Vector2(Gdx.graphics.getWidth() / 2 - Gdx.input.getX() + camPos.x + rect.width,
-//                camPos.y + (Gdx.graphics.getHeight() / 2 - Gdx.input.getY()) + rect.getHeight() / 3);
-
         isPressed = rect.contains(pos);
-
-        //System.out.println("ButtonPos= " + rect.toString());
-        //System.out.println("PressPos= " + pos.toString());
-//        I/System.out: ButtonPos= [800.0,2620.0,48.0,48.0]
-//        I/System.out: PressPos= (805.0,3118.0)
     }
 
     public boolean isPressed(){
@@ -96,6 +81,5 @@ public class PressButton {
             updatePressState();
         }
         else isPressed = false;
-        //sprite.setPosition(camPos.x + pos.x - Gdx.graphics.getWidth() / 2 , camPos.y - Gdx.graphics.getHeight() +  pos.y);
     }
 }

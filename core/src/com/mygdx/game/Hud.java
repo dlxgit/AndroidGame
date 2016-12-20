@@ -16,12 +16,9 @@ public class Hud {
     public static final Vector2 HEALTH_BAR_BORDER_POSITION = new Vector2(50, 1000);
     public static final Vector2 HEALTH_BAR_POSITION = new Vector2(HEALTH_BAR_BORDER_POSITION.x + 15.f,
                                                                 HEALTH_BAR_BORDER_POSITION.y + 4.f);
-    public static final String ammoText = new String();
-    public static final String savedNpcsText = new String();
 
     Texture healthBar;
     Texture healthBarBorder;
-    Texture PlayerImage;
     Texture items;
 
     int healthBarPercentage;
@@ -49,10 +46,8 @@ public class Hud {
         currentAmmo = inventory.getCurrentAmmo();
     }
 
-    public void render(SpriteBatch batch, BitmapFont font){
+    public void render(SpriteBatch batch){
         batch.draw(healthBarBorder, HEALTH_BAR_BORDER_POSITION.x, HEALTH_BAR_BORDER_POSITION.y);
         batch.draw(healthBar, HEALTH_BAR_POSITION.x, HEALTH_BAR_POSITION.y, 0, 0, healthBar.getWidth() * healthBarPercentage / 100, healthBar.getHeight());
-        //batch.draw
-        //font.
     }
 }

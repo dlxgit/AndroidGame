@@ -21,9 +21,9 @@ public class Inventory {
 
     final int ITEM_AMMO[] = new int[]{ //ammo that can be given from picking-up loot.
             12, //pistol
-            6, //grenade,
+            6,  //grenade,
             50, //fire-ex
-            1 //medicine
+            1   //medicine
     };
 
     boolean isChangeAllowed = true;
@@ -48,10 +48,8 @@ public class Inventory {
     }
 
     public boolean useItem() {
-        //TODO:: bug with endless bullets after taking loot smg         (или нету)
         if (ammo[nItem] > 0 && cooldown == 0) { //if it has ammo and no cooldown
             System.out.println("Item_use");
-            //TODO:COOLDOWN FROM CONST (just 1 value or for each item?)
             if(nItem != 2){ //set cooldown if its not fire-extinguisher(no cooldown)
                 cooldown = 1;
             }
