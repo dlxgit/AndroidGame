@@ -24,8 +24,6 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.badlogic.gdx.graphics.GL20;
 
 public class TouchPad implements ApplicationListener {
-
-    private SpriteBatch batch;
     private Touchpad touchpad;
     private TouchpadStyle touchpadStyle;
     private Skin touchpadSkin;
@@ -56,9 +54,6 @@ public class TouchPad implements ApplicationListener {
         //setBounds(x,y,width,height)
         touchpad.setBounds(15, 15, 320, 320);
 
-
-        //Create a Stage and add TouchPad
-        //Create block sprite
         blockTexture = new Texture(Gdx.files.internal("images/block.png"));
         blockSprite = new Sprite(blockTexture);
 
@@ -77,7 +72,6 @@ public class TouchPad implements ApplicationListener {
     }
 
     public void render(SpriteBatch batch) {
-        //Move blockSprite with TouchPad
         blockSprite.setX(blockSprite.getX() + touchpad.getKnobPercentX() * blockSpeed);
         blockSprite.setY(blockSprite.getY() + touchpad.getKnobPercentY() * blockSpeed);
         blockSprite.draw(batch);

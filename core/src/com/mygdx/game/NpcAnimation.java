@@ -107,7 +107,7 @@ public class NpcAnimation {
     }
 
     public TextureRegion getCurrentFrame(Npc.Type type, boolean isLiving){
-        if(isLiving == false){
+        if(!isLiving){
             return npcDeathAnimation.getKeyFrame(stateTime, false);
         }
 

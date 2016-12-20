@@ -48,14 +48,14 @@ public class Loot {
     public static final int MAX_QUANTITY = 8;
 
     Type type;
-    TextureRegion region;
+    private TextureRegion region;
     Rectangle rectangle;
 
 
     public Loot(Assets assets, Type type, Vector2 position){
         this.type = type;
         this.rectangle = new Rectangle(position.x, position.y , IMAGE_SIZE.x, IMAGE_SIZE.y);
-        Texture texture = assets.manager.get(assets.itemsTextureName);
+        Texture texture = assets.manager.get(Assets.itemsTextureName);
         this.region = new TextureRegion(texture, (int)(type.val * IMAGE_SIZE.x), 0, (int)IMAGE_SIZE.x, (int)IMAGE_SIZE.y);
     }
 
@@ -63,7 +63,7 @@ public class Loot {
         batch.draw(region, rectangle.getX(), rectangle.getY());
     }
 
-    static Rectangle calculateSpawnPosition(MapObjects solidObjects, Random rand) {
+    private static Rectangle calculateSpawnPosition(MapObjects solidObjects, Random rand) {
         return Entity.calculateObjectSpawnPosition(IMAGE_SIZE, solidObjects, new Rectangle(0, 1540, 3110, 3600 - 1540), rand);
     }
 

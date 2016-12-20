@@ -76,7 +76,7 @@ public class EnemyAnimation {
         }
     }
 
-    public TextureRegion getCurrentFrame() {
+    TextureRegion getCurrentFrame() {
         return currentFrame;
     }
 

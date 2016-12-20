@@ -22,138 +22,64 @@ import java.util.Iterator;
 import java.util.Vector;
 import java.util.Random;
 
-//почему нельзя писать assets.manager.get() возвращающий текстуру, прямо в вызове функции?? вместо того чтобы перед этим инициализировать текстуру таким же образом и передавать в функцию готовую текстуру
-
-/*
-Bugs:
-	exploding enemy can attack;
-
- */
-
-/*
-To do:
-	bullet start position depending on direction (correctly);
-	try to integrate with tiled;
-
-	fix enemy state-calculating methods
- */
-
-/*
-	в анимациях убрать поле currentFrame и просто возвращать TextureRegion из функции прямо в метод отрисовки.
-	но может быть проблема с вычислением состояний когда они зависят от isAnimationFinished(); так что можно оставить как есть?
- */
-
-//сделать при спасении NPC принтовать очки на экране за спасение (как дамаг в вов)
-//в конце уровня подсчет очков прямо как в оригинале
-
-
-/*
-	сделать static анимации, храня свойства обьектов для визуального отображения внутри других(самих) классов
- */
-
-/*
-	сделать класс анимации NPC таким: передавать в него параметр тип NPC и хранить для каждого лишь одну анимацию(а не все сразу) пример: сейчас у каждого NPC есть анимация, в которой все анимации всех NPC.
-	либо сделать чисто один статичный класс анимации для каждого из типов сущностей (пуля, игрок, враг(каждый?)).
-
- */
-
-
-/*
-	fix user interface (game window)
- */
-
-/*
-	записать все константы в класс
-	адаптировать код связанный с врагами к разным типам врагов
-	ввести топоры от китайцев + гранаты как один класс,полоску загрузки ресурсов
- */
-
-/*
-    некорректно рисует огнетушитель
-    нет текста на экране
-    плохое расположение интерфейса
-    нет меню
-    нет музыки
-    не реализована полоска хп, боеприпасы на экране
-
- */
-
-
-/*
-    доработать огнетушитель (координаты дыма + отдалять и приближать дым по мере нажатия)
-
- */
-
-
-//пуля не удаляется после попадания в киайца
-
-//сделать рекорды + как цель - спасти больше npc, второй параметр: как можно быстрее.
-//сделать спавн npc Случайным? (генерация уровня), тем самым будет 1 уровень, и целью будет поставить рекорд, спася больше npc, и за меньшее время.
-//сделать счетчик времени на экране
-
-//огнетушитель менять дистанцию + !!не коцает врагов?
-//
 
 public class Game extends ApplicationAdapter {
-    enum State {
+    private enum State {
         MENU,
         PLAY,
         END,
         LEVEL_COMPLETE
     }
 
-    static final int ENEMY_MAX_QUANTITY = 5;
-    //static final int NPC_MAX_QUANTITY = 9;
-    static final int NPC_MAX_QUANTITY = 1;
-    static final Vector2 ENEMY_SPAWN_RADIUS = new Vector2(400, 400);
-    static final Vector2 MAP_SIZE = new Vector2(3200, 3200);
-    float aspectRatio;
-    Vector2 GAMEWORLD_SIZE;
+    public static final int ENEMY_MAX_QUANTITY = 7;
+    public static final int NPC_MAX_QUANTITY = 8;
+    public static final Vector2 ENEMY_SPAWN_RADIUS = new Vector2(400, 400);
+    public static final Vector2 MAP_SIZE = new Vector2(3200, 3200);
+    public static final float SMG_USING_TIME = 0.5f;    //delay to allow to move after using item
+    public static final float GRENADE_THROW_ACTION_TIME = 0.5f;
+    public static final float FIRE_EXTINGUISHER_DAMAGE = 50f;
 
-    int survivedNpcs;
 
-    static final float SMG_USING_TIME = 0.5f;    //delay to allow to move after using item
-    static final float GRENADE_THROW_ACTION_TIME = 0.5f;
-    static final float FIRE_EXTINGUISHER_DAMAGE = 50f;
-    Assets assets;
-    State state;
-    private OrthographicCamera camera;
+    private Assets assets;
+
     private Stage stage;
+
+    private OrthographicCamera camera;
+    private Viewport viewport;
+    float lastFrameDuration;
     SpriteBatch batch;
-    SpriteBatch hudBatch;
-    Texture img;
-    TouchPad touchPad;
+    private SpriteBatch hudBatch;
+    private TouchPad touchPad;
+    private InputController inputController;
 
-    InputController inputController;
+    private State state;
 
-    PressButton fireButton;
-    PressButton changeSlotButton;
-    PressButton startButton;
-    PressButton quitButton;
+    private Player player;
+    private Inventory inventory;
 
-    Player player;
-    InputMultiplexer multiplexer;
-    float gameTime;
-    Random rnd;
+    private Vector<Enemy> enemyList;
+    private Vector<Bullet> bulletList;
+    private Vector<Npc> npcList;
+    private Vector<Loot> lootList;
 
-    Vector<Enemy> enemyList;
-    Vector<Bullet> bulletList;
-    Vector<Npc> npcList;
-    Vector<Loot> lootList;
+    private Random rnd;
+    private int survivedNpcs;
 
-    Inventory inventory;
-    TileMap map;
-    HealthBar healthBar;
-    ShapeRenderer shapeRenderer;
-    Viewport viewport;
-    MapObjects solidObjects;
-    Hud hud;
+    private TileMap map;
+    private MapObjects solidObjects;
+
+    private Hud hud;
+    private HealthBar healthBar;
+    private PressButton fireButton;
+    private PressButton changeSlotButton;
+    private PressButton startButton;
+    private PressButton quitButton;
 
 
     @Override
     public void create() {
-        aspectRatio = (float) Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
-        GAMEWORLD_SIZE = new Vector2(aspectRatio * 3200, 3200);
+        float aspectRatio = (float) Gdx.graphics.getWidth() / (float) Gdx.graphics.getHeight();
+        Vector2 GAMEWORLD_SIZE = new Vector2(aspectRatio * 3200, 3200);
         camera = new OrthographicCamera(GAMEWORLD_SIZE.x, GAMEWORLD_SIZE.y);
         camera.position.set(GAMEWORLD_SIZE.x / 2 - 1700, GAMEWORLD_SIZE.y / 2 + 1080, 0);
         viewport = new FitViewport(1920, 1080, camera);
@@ -164,12 +90,11 @@ public class Game extends ApplicationAdapter {
         touchPad.create();
         stage.addActor(touchPad.getTouchpad());
         inputController = new InputController();
-        multiplexer = new InputMultiplexer();
+        InputMultiplexer multiplexer = new InputMultiplexer();
         multiplexer.addProcessor(stage);
         multiplexer.addProcessor(inputController);
         Gdx.input.setInputProcessor(multiplexer);
 
-        shapeRenderer = new ShapeRenderer();
         assets = new Assets();
 
         bulletList = new Vector<Bullet>();
@@ -182,43 +107,20 @@ public class Game extends ApplicationAdapter {
         hudBatch = new SpriteBatch();
         map = new TileMap(camera, 0);
 
-        fireButton = new PressButton(assets, PressButton.Type.FIRE);
-        changeSlotButton = new PressButton(assets, PressButton.Type.CHANGE_SLOT);
-        startButton = new PressButton(assets, PressButton.Type.START);
-        quitButton = new PressButton(assets, PressButton.Type.QUIT);
-
-        rnd = new Random();
 
         healthBar = new HealthBar(assets, new Vector2(30, 400));
 
         state = State.MENU;
 
+        fireButton = new PressButton(assets, PressButton.Type.FIRE);
+        changeSlotButton = new PressButton(assets, PressButton.Type.CHANGE_SLOT);
+        startButton = new PressButton(assets, PressButton.Type.START);
+        quitButton = new PressButton(assets, PressButton.Type.QUIT);
+
         hud = new Hud(assets);
-        assets.menuMusic.play();
-    }
-
-    void initializeWorld(int level) {
-        survivedNpcs = 0;
-        gameTime = 0;
-
-        bulletList = new Vector<Bullet>();
-        enemyList = new Vector<Enemy>();
-        lootList = new Vector<Loot>();
-        inventory = new Inventory();
-        npcList = new Vector<Npc>();
-        npcList = initializeNpc();
-
-        map = new TileMap(camera, level);
-        player = new Player(assets);
         rnd = new Random();
-
-        solidObjects = map.lvl.getLayers().get("solid").getObjects();
-        if(level == 0){
-            assets.level0Music.play();
-        }
-        else{
-            assets.level1Music.play();
-        }
+        lastFrameDuration = 0;
+        assets.menuMusic.play();
     }
 
     @Override
@@ -250,8 +152,31 @@ public class Game extends ApplicationAdapter {
     @Override
     public void dispose() {
         batch.dispose();
+        hudBatch.dispose();
         assets.dispose();
         map.dispose();
+    }
+
+    void initializeWorld(int level) {
+        survivedNpcs = 0;
+
+        bulletList = new Vector<Bullet>();
+        enemyList = new Vector<Enemy>();
+        lootList = new Vector<Loot>();
+        inventory = new Inventory();
+        npcList = new Vector<Npc>();
+        npcList = Npc.initializeNpc(assets);
+
+        map = new TileMap(camera, level);
+        player = new Player(assets);
+        rnd = new Random();
+        solidObjects = map.lvl.getLayers().get("solid").getObjects();
+        if(level == 0){
+            assets.level0Music.play();
+        }
+        else{
+            assets.level1Music.play();
+        }
     }
 
     private void onMenu(){
@@ -288,7 +213,9 @@ public class Game extends ApplicationAdapter {
             }
         }
         hudBatch.begin();
-        hudBatch.draw(assets.levelFinishTexture, Gdx.graphics.getWidth() / 2 - assets.levelFinishTexture.getWidth() / 2, Gdx.graphics.getHeight() / 2 - assets.levelFinishTexture.getHeight() / 2);
+        hudBatch.draw(assets.levelFinishTexture,
+                Gdx.graphics.getWidth() / 2 - assets.levelFinishTexture.getWidth() / 2,
+                Gdx.graphics.getHeight() / 2 - assets.levelFinishTexture.getHeight() / 2);
         hudBatch.end();
     }
 
@@ -297,27 +224,10 @@ public class Game extends ApplicationAdapter {
             state = State.MENU;
         }
         hudBatch.begin();
-        hudBatch.draw(assets.gameOverTexture, Gdx.graphics.getWidth() / 2 - assets.gameOverTexture.getWidth() / 2, Gdx.graphics.getHeight() / 2 - assets.gameOverTexture.getHeight() / 2);
+        hudBatch.draw(assets.gameOverTexture,
+                Gdx.graphics.getWidth() / 2 - assets.gameOverTexture.getWidth() / 2,
+                Gdx.graphics.getHeight() / 2 - assets.gameOverTexture.getHeight() / 2);
         hudBatch.end();
-    }
-
-    private void updateCamera(){
-        camera.update();
-        camera.position.set(player.rectangle.x, player.rectangle.y, 0);
-        if (camera.position.x > 2220) {
-            camera.position.x = 2220;
-        }
-        else if (camera.position.x < Gdx.graphics.getWidth() / 2) {
-            camera.position.x = Gdx.graphics.getWidth() / 2 + 50;
-        }
-        if (camera.position.y > 2660) {
-            camera.position.y = 2660;
-        }
-        else if (camera.position.y < 2010) {
-            camera.position.y = 2010;
-        }
-        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        batch.setProjectionMatrix(camera.combined);
     }
 
     private void renderGame(){
@@ -343,17 +253,19 @@ public class Game extends ApplicationAdapter {
         stage.draw();
     }
 
-    public void update() {
-        gameTime += Gdx.graphics.getDeltaTime();
+    private void update() {
+        float deltaTime = Gdx.graphics.getDeltaTime();
+        if(lastFrameDuration < 0.035){
+            lastFrameDuration += deltaTime;
+            return;
+        }
+        lastFrameDuration = deltaTime;
 
         updateCamera();
-        player.update(touchPad, solidObjects);
-        fireButton.update(inputController);
-        changeSlotButton.update(inputController);
         checkEnemySpawn();
         checkLootSpawn();
+        player.update(touchPad, solidObjects);
         handleInventory();
-
         updateBullets();
         updateEnemies();
         updateNpcs();
@@ -371,19 +283,34 @@ public class Game extends ApplicationAdapter {
         map.update(camera);
         stage.act(Gdx.graphics.getDeltaTime());
 
-        if(survivedNpcs > NPC_MAX_QUANTITY - 2 && map.nLevel == 0){
+        if(survivedNpcs > NPC_MAX_QUANTITY - 2){
             assets.level1Music.stop();
             assets.level0Music.stop();
             assets.levelFinishSound.play();
             state = State.LEVEL_COMPLETE;
         }
-
-//        if(survivedNpcs > NPC_MAX_QUANTITY - 2 && npcList.size() == 0 || npcList.size() == 0 && gameTime > 30){
-//            state = State.LEVEL_COMPLETE;
-//        }
     }
 
-    public void updateBullets() {
+    private void updateCamera(){
+        camera.update();
+        camera.position.set(player.rectangle.x, player.rectangle.y, 0);
+        if (camera.position.x > 2220) {
+            camera.position.x = 2220;
+        }
+        else if (camera.position.x < Gdx.graphics.getWidth() / 2) {
+            camera.position.x = Gdx.graphics.getWidth() / 2 + 50;
+        }
+        if (camera.position.y > 2660) {
+            camera.position.y = 2660;
+        }
+        else if (camera.position.y < 2010) {
+            camera.position.y = 2010;
+        }
+        viewport.update(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        batch.setProjectionMatrix(camera.combined);
+    }
+
+    private void updateBullets() {
         for (Iterator<Bullet> it = bulletList.iterator(); it.hasNext(); ) {
             Bullet bullet = it.next();
             bullet.update(solidObjects);
@@ -394,7 +321,7 @@ public class Game extends ApplicationAdapter {
             }
             if (bullet.getTarget() == Bullet.Target.PLAYER) { //axe
                 if (bullet.isCollisionWithTarget(player.rectangle)) {
-                    player.takeDamage(bullet.attackDamage, assets);
+                    player.takeDamage(10, assets);
                     it.remove();
                 }
                 continue;
@@ -420,20 +347,7 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    void checkEnemySpawn() {
-        if (enemyList.size() < ENEMY_MAX_QUANTITY && (enemyList.isEmpty() || enemyList.lastElement().livingTime > 2)) {
-            enemyList.add(Enemy.createRandomEnemyNearPlayer(assets, new Rectangle(camera.position.x, camera.position.y, 30, 30), solidObjects, rnd));
-       }
-    }
-
-    void checkLootSpawn() {
-        if (lootList.size() < Loot.MAX_QUANTITY) {
-            lootList.add(Loot.createLoot(assets, solidObjects, rnd));
-        }
-    }
-
-
-    public void updateEnemies() {
+    private void updateEnemies() {
         for (Iterator<Enemy> it = enemyList.iterator(); it.hasNext(); ) {
             Enemy enemy = it.next();
             enemy.update(player, solidObjects, assets);
@@ -448,8 +362,7 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-
-    public void updateNpcs() {
+    private void updateNpcs() {
         for (Iterator<Npc> it = npcList.iterator(); it.hasNext(); ) {
             Npc npc = it.next();
             npc.update();
@@ -475,7 +388,7 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    public void updateLoot() {
+    private void updateLoot() {
         for (Iterator<Loot> it = lootList.iterator(); it.hasNext(); ) {
             Loot loot = it.next();
             if (loot.rectangle.overlaps(player.rectangle)) { //itemPickUp
@@ -490,13 +403,13 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    public void renderBullets() {
+    private void renderBullets() {
         for (Bullet bullet : bulletList) {
             bullet.render(batch);
         }
     }
 
-    public void renderEnemies() {
+    private void renderEnemies() {
         for (Enemy enemy : enemyList) {
             enemy.render(batch);
         }
@@ -514,22 +427,11 @@ public class Game extends ApplicationAdapter {
         }
     }
 
-    public Vector<Npc> initializeNpc() {
-        Texture texture = assets.manager.get(assets.npcTextureName);
-        Vector<Npc> npcList = new Vector<Npc>();
-        npcList.add(new Npc(texture, Npc.Type.PHOTOGRAPHS, 5 * 48, 8 * 48));
-        npcList.add(new Npc(texture, Npc.Type.BABY, 48 * 48, 10 * 48));
-        npcList.add(new Npc(texture, Npc.Type.TEACHER, 9 * 48, 15 * 48));
-        npcList.add(new Npc(texture, Npc.Type.DOG, 53 * 48, 15 * 48));
-        npcList.add(new Npc(texture, Npc.Type.SOLDIER, 28 * 48, 28 * 48));
-        npcList.add(new Npc(texture, Npc.Type.SEARCHER, 55 * 48, 4 * 48));
-        npcList.add(new Npc(texture, Npc.Type.COOK, 22 * 48, 14 * 48));
-        npcList.add(new Npc(texture, Npc.Type.GIRL, 15 * 48, 6 * 48));
 
-        return npcList;
-    }
 
     public void handleInventory() {
+        changeSlotButton.update(inputController);
+        fireButton.update(inputController);
         if (changeSlotButton.isPressed() && inventory.isChangeAllowed) {
             inventory.changeItem();
 
@@ -567,6 +469,18 @@ public class Game extends ApplicationAdapter {
                         break;
                 }
             }
+        }
+    }
+
+    private void checkEnemySpawn() {
+        if (enemyList.size() < ENEMY_MAX_QUANTITY && (enemyList.isEmpty() || enemyList.lastElement().livingTime > 2)) {
+            enemyList.add(Enemy.createRandomEnemyNearPlayer(assets, new Rectangle(camera.position.x, camera.position.y, 30, 30), solidObjects, rnd));
+        }
+    }
+
+    private void checkLootSpawn() {
+        if (lootList.size() < Loot.MAX_QUANTITY) {
+            lootList.add(Loot.createLoot(assets, solidObjects, rnd));
         }
     }
 }

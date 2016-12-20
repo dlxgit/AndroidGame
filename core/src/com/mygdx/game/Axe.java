@@ -16,12 +16,10 @@ import com.badlogic.gdx.math.Vector2;
 
 public class Axe extends Bullet {
     public static final float ROTATE_INTERVAL = 0.2f;
-    public final float MOVE_SPEED = 10;
-    float angle;
-    float rotationAngle;
-    Vector2 step;
-    Sprite sprite;
-    float lastRotateTime;
+    public static final float MOVE_SPEED = 10;
+    private Vector2 step;
+    private Sprite sprite;
+    private float lastRotateTime;
 
     public Axe(Assets assets, Rectangle playerRect, Rectangle enemyRect, Direction dir){
         float dx = playerRect.x - enemyRect.x;
@@ -29,20 +27,14 @@ public class Axe extends Bullet {
         float distance = (float) Math.sqrt(dx * dx + dy * dy);
         step = new Vector2((dx/(distance)) * MOVE_SPEED,
                           ((dy/(distance)) * MOVE_SPEED));
+
         isCollidable = true;
-        Texture bulletTexture = assets.manager.get(assets.axeEnemyTextureName);
+        Texture bulletTexture = assets.manager.get(Assets.axeEnemyTextureName);
         sprite = new Sprite(bulletTexture, 117, 18, 16, 16);
         target = Target.PLAYER;
 
-        double A;
-        A = Math.atan2(enemyRect.y - playerRect.y, enemyRect.x - playerRect.x) / Math.PI * 180;
-        if(A < 0){
-            A = A + 360;
-        }
-        angle = (float)A;
         attackDamage = 50;
         moveSpeed = 5.f;
-        rotationAngle = 0;
         direction = dir;
         rectangle = new Rectangle(enemyRect.x, enemyRect.y, 16, 21);
         livingTime = 0;
@@ -60,6 +52,8 @@ public class Axe extends Bullet {
 
     @Override
     public void update(MapObjects solidObjects){
+        this.livingTime += Gdx.graphics.getDeltaTime();
+
         if(!isDead) {
             updatePositionByCountingCollision(solidObjects);
             if(isCollision){
@@ -67,8 +61,10 @@ public class Axe extends Bullet {
             }
             sprite.setPosition(rectangle.getX(), rectangle.getY());
         }
-        this.livingTime += Gdx.graphics.getDeltaTime();
-        sprite.setOrigin(sprite.getX() + sprite.getWidth() / 2, sprite.getY() - sprite.getHeight() / 2);
+
+        sprite.setOrigin(sprite.getX() + sprite.getWidth() / 2,
+                         sprite.getY() - sprite.getHeight() / 2);
+
         if(this.livingTime < lastRotateTime + ROTATE_INTERVAL) {
             sprite.rotate90(false);
             lastRotateTime = livingTime;

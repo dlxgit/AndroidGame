@@ -15,25 +15,21 @@ public class Hud {
 
     public static final Vector2 HEALTH_BAR_BORDER_POSITION = new Vector2(50, 1000);
     public static final Vector2 HEALTH_BAR_POSITION = new Vector2(HEALTH_BAR_BORDER_POSITION.x + 15.f,
-                                                                HEALTH_BAR_BORDER_POSITION.y + 4.f);
+                                                                  HEALTH_BAR_BORDER_POSITION.y + 4.f);
 
-    Texture healthBar;
-    Texture healthBarBorder;
-    Texture items;
+    private Texture healthBar;
+    private Texture healthBarBorder;
 
-    int healthBarPercentage;
-    int currentAmmo;
-    Loot.Type currentItem;
+    private int healthBarPercentage;
+    private int currentAmmo;
+    private Loot.Type currentItem;
+
 
     public Hud(Assets assets){
-        Texture playerImageTexture = assets.manager.get(assets.playerImageTextureName);
-        Texture healthBar = assets.manager.get(assets.healthBarLineName);
-        Texture healthBarBorder = assets.manager.get(assets.healthBarBorderName);
-        Texture items = assets.manager.get(assets.itemsTextureName);
-        this.items = items;
+        Texture healthBar = assets.manager.get(Assets.healthBarLineName);
+        Texture healthBarBorder = assets.manager.get(Assets.healthBarBorderName);
         this.healthBar = healthBar;
         this.healthBarBorder = healthBarBorder;
-
         healthBarPercentage = 100;
     }
 

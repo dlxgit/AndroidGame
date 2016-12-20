@@ -17,12 +17,12 @@ import com.badlogic.gdx.math.Vector2;
 public class Grenade extends Bullet{
     public static final float MOVE_SPEED = 15;
     public static final Vector2 EXPLOSION_RADIUS = new Vector2(100, 100);
-    float rotationAngle;
-    Vector2 startPos;
-    Sprite sprite;
+    private float rotationAngle;
+    private Vector2 startPos;
+    private Sprite sprite;
 
-    static Animation deathAnimation;
-    float stateTime;
+    private static Animation deathAnimation;
+    private float stateTime;
 
     public Grenade(Assets assets, Vector2 playerCenter, Direction playerDirection){
         isCollidable = false;
@@ -30,7 +30,7 @@ public class Grenade extends Bullet{
         target = Target.ENEMY;
         livingTime = 0;
         DEATH_TIME = 3;
-        Texture playerSheet = assets.manager.get(assets.heroTextureName);
+        Texture playerSheet = assets.manager.get(Assets.heroTextureName);
         sprite = new Sprite(playerSheet, 462, 260, 14, 14); //grenade
 
         moveSpeed = 5.f;
@@ -75,7 +75,6 @@ public class Grenade extends Bullet{
     public void update(MapObjects solidObjects){
         if(!isDead) {
             updatePosition();
-            System.out.println(String.valueOf(rectangle.y) + " " + String.valueOf(startPos.y));
             if(livingTime > 1.65){
                 die();
                 rectangle = new Rectangle(rectangle.getX() - EXPLOSION_RADIUS.x / 2,

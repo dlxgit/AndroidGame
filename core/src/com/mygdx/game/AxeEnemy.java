@@ -23,7 +23,7 @@ public class AxeEnemy extends Enemy{
         livingTime = 0;
         health = 100;
         attackCooldown = 0;
-        Texture texture = assets.manager.get(assets.axeEnemyTextureName);
+        Texture texture = assets.manager.get(Assets.axeEnemyTextureName);
         animation = new AxeEnemyAnimation(texture);
         actionCooldown = 2;
     }
@@ -80,7 +80,7 @@ public class AxeEnemy extends Enemy{
         if(state == State.ATTACK && attackCooldown > 1.5 || state != State.ATTACK){
                 batch.draw(animation.getCurrentFrame(state, direction), rectangle.getX(), rectangle.getY());
         }
-        else batch.draw(animation.getCurrentFrame(state.MOVE, direction), rectangle.getX(), rectangle.getY());
+        else batch.draw(animation.getCurrentFrame(State.MOVE, direction), rectangle.getX(), rectangle.getY());
     }
 
     @Override

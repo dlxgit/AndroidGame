@@ -14,42 +14,38 @@ import java.util.Enumeration;
  */
 
 public class Inventory {
-    Integer ammo[]; //quantity of each item in inventory
-
-    private int nItem;
-    private float cooldown;
-
-    final int ITEM_AMMO[] = new int[]{ //ammo that can be given from picking-up loot.
+    public static final int ITEM_AMMO[] = new int[]{ //ammo that can be given from picking-up loot.
             12, //pistol
             6,  //grenade,
             50, //fire-ex
             1   //medicine
     };
 
+    private Integer ammo[]; //quantity of each item in inventory
+    private int nItem;
+    private float cooldown;
     boolean isChangeAllowed = true;
 
     public Inventory(){
-        nItem = 0;
-
         initializeInventory();
+        nItem = 0;
         cooldown = 0;
     }
 
-    public void takeItem(int itemIndex){
+    void takeItem(int itemIndex){
 
         ammo[itemIndex] += ITEM_AMMO[itemIndex];
     }
 
-    public void changeItem() {
+    void changeItem() {
         if (isChangeAllowed) {
             nItem = getNextItemIndex();
             isChangeAllowed = false;
         }
     }
 
-    public boolean useItem() {
+    boolean useItem() {
         if (ammo[nItem] > 0 && cooldown == 0) { //if it has ammo and no cooldown
-            System.out.println("Item_use");
             if(nItem != 2){ //set cooldown if its not fire-extinguisher(no cooldown)
                 cooldown = 1;
             }
@@ -67,7 +63,6 @@ public class Inventory {
         else{
             cooldown = 0;
         }
-        System.out.println(Loot.Type.getType(getCurrentSlot()).toString());
     }
 
     private void initializeInventory(){
@@ -79,7 +74,7 @@ public class Inventory {
         };
     }
 
-    public int getCurrentSlot(){
+    int getCurrentSlot(){
         return nItem;
     }
 
@@ -97,7 +92,7 @@ public class Inventory {
         return nItem;
     }
 
-    public int getCurrentAmmo(){
+    int getCurrentAmmo(){
         return ammo[nItem];
     }
 }

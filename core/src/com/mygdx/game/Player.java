@@ -21,14 +21,13 @@ public class Player extends Entity {
         THROW_GRENADE,
     }
 
-    public static float BONUS_DURATION = 10.f;
+    private static float BONUS_DURATION = 10.f;
 
-
-    public final Vector2 startPos = new Vector2(300, 300);
-    public final int defaultMoveSpeed = 10;
-    public final int BONUS_MOVE_SPEED = 4;
-    public final float MAX_HEALTH = 100;
-    public static final float MEDICINE_HEALTH = 30;
+    private final Vector2 startPos = new Vector2(300, 300);
+    private final int defaultMoveSpeed = 10;
+    private final int BONUS_MOVE_SPEED = 4;
+    final float MAX_HEALTH = 100;
+    private static final float MEDICINE_HEALTH = 30;
 
     Texture texture;
     int health;
@@ -36,12 +35,12 @@ public class Player extends Entity {
     State state;
     PlayerAnimation animation;
 
-    float itemCooldown;
+    private float itemCooldown;
     float actionTimeRemaining;
-    float bonusTimeRemaining = 0;
-    float stateTime = 0;
-    Vector2 extinguisherStartPos;
-    Rectangle extinguisherRect;
+    private float bonusTimeRemaining = 0;
+    private float stateTime = 0;
+    private Vector2 extinguisherStartPos;
+    private Rectangle extinguisherRect;
 
     public Player(Assets assets) {
         state = State.MOVE;
@@ -50,7 +49,7 @@ public class Player extends Entity {
 
         health = 100;
         rectangle = new Rectangle(startPos.x, Game.MAP_SIZE.y - startPos.y, 19, 36);
-        texture = assets.manager.get(assets.heroTextureName);
+        texture = assets.manager.get(Assets.heroTextureName);
         animation = new PlayerAnimation(texture);
         moveSpeed = defaultMoveSpeed;
         extinguisherRect = new Rectangle();
@@ -62,12 +61,11 @@ public class Player extends Entity {
         renderExtinguisher(batch);
     }
 
-    public void updateState() {
+    private void updateState() {
 
         switch (state) {
             case DAMAGED:
                 if (animation.damagedAnimation.isAnimationFinished(stateTime)) {
-                    System.out.println("DAMAGE_ANIMATION_FINISHED!");
                     state = State.MOVE;
                 }
                 break;
@@ -99,7 +97,7 @@ public class Player extends Entity {
         }
     }
 
-    public void updateDirection(Touchpad touchpad){
+    private void updateDirection(Touchpad touchpad){
         Vector2 v = new Vector2(touchpad.getKnobPercentX(), touchpad.getKnobPercentY());
         if(Math.abs(v.x) < 0.2 && Math.abs(v.y) < 0.2) {
             direction = Direction.NONE;
@@ -140,21 +138,21 @@ public class Player extends Entity {
         stateTime += Gdx.graphics.getDeltaTime();
     }
 
-    public void takeDamage(float damage, Assets assets){
+    void takeDamage(float damage, Assets assets){
         health -= damage;
         state = State.DAMAGED;
         stateTime = 0;
         assets.takeDamageSound.play();
     }
 
-    public void useMedicine(){
+    void useMedicine(){
         health += MEDICINE_HEALTH;
         if(health > 100){
             health = 100;
         }
     }
 
-    public void activateSpeedBonus(){
+    void activateSpeedBonus(){
         moveSpeed += BONUS_MOVE_SPEED;
         bonusTimeRemaining = BONUS_DURATION;
     }
@@ -183,7 +181,7 @@ public class Player extends Entity {
 
     Rectangle getExtinguisherRectangle(MapObjects solid) {
         Vector2 frameSize = new Vector2(animation.fireExtinguisherAnimation.getKeyFrame(0).getRegionWidth(), animation.fireExtinguisherAnimation.getKeyFrame(0).getRegionHeight());
-        Vector2 deltaDistance = Entity.calculateDeltaDistance(lastDirection, animation.EXTINGUISHER_SPEED);
+        Vector2 deltaDistance = Entity.calculateDeltaDistance(lastDirection, PlayerAnimation.EXTINGUISHER_SPEED);
         Rectangle resultRect = new Rectangle(extinguisherStartPos.x + deltaDistance.x * animation.extinguishTime,
                                              extinguisherStartPos.y + deltaDistance.y * animation.extinguishTime,
                                              frameSize.x,

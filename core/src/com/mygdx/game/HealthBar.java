@@ -11,17 +11,15 @@ import com.badlogic.gdx.math.Vector2;
 
 public class HealthBar {
     public final Vector2 healthLineMaxSize = new Vector2(150, 27);
-    Texture barTexture;
-    Sprite bar;
-    Texture healthLineTexture;
-    Sprite healthLine;
-    int healthPercent;
+    private Texture barTexture;
+    private Sprite bar;
+    private Texture healthLineTexture;
+    private Sprite healthLine;
 
     public HealthBar(Assets assets, Vector2 viewPortCenter){
-        healthPercent = 100;
-        barTexture = assets.manager.get(assets.healthBarBorderName);
+        barTexture = assets.manager.get(Assets.healthBarBorderName);
         bar = new Sprite(barTexture);
-        healthLineTexture = assets.manager.get(assets.healthBarLineName);
+        healthLineTexture = assets.manager.get(Assets.healthBarLineName);
         healthLine = new Sprite(healthLineTexture);
         setPosition(viewPortCenter);
     }
@@ -36,13 +34,13 @@ public class HealthBar {
         setPosition(viewPortCenter);
     }
 
-    public void setPosition(Vector2 viewPortCenter){
+
+    private void setPosition(Vector2 viewPortCenter){
         bar.setPosition(viewPortCenter.x - 350, viewPortCenter.y + 265);
         healthLine.setPosition(bar.getX() + 5, bar.getY() - 40);
     }
 
-    public void setHealthPercent(int healthPercent){
-        this.healthPercent = healthPercent;
-        this.healthLine.setRegion(0,0, healthLineMaxSize.x * healthPercent, healthLineMaxSize.y);
+    private void setHealthPercent(int healthPercent){
+        healthLine.setRegion(0,0, healthLineMaxSize.x * healthPercent, healthLineMaxSize.y);
     }
 }

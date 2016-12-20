@@ -156,7 +156,7 @@ public class Entity {
 
 
 
-    static Rectangle calculateObjectSpawnPosition(Vector2 objectSize, MapObjects solidObjects, Rectangle mapSector, Random rand){
+    public static Rectangle calculateObjectSpawnPosition(Vector2 objectSize, MapObjects solidObjects, Rectangle mapSector, Random rand){
         while (true) {
             Rectangle resultRect = new Rectangle((rand.nextInt((int) (mapSector.width / TileMap.STEP_TILE))) * TileMap.STEP_TILE + mapSector.x,
                                                 (rand.nextInt((int) (mapSector.height / TileMap.STEP_TILE))) * TileMap.STEP_TILE + mapSector.y,

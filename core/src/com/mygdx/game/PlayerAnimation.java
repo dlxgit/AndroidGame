@@ -78,7 +78,7 @@ public class PlayerAnimation {
     }
 
 
-    public TextureRegion getCurrentFrame(Player.State playerState, Direction playerLastDirection, float stateTime) {
+    TextureRegion getCurrentFrame(Player.State playerState, Direction playerLastDirection, float stateTime) {
         switch (playerState) {
             case DAMAGED:
                 return damagedAnimation.getKeyFrame(stateTime, false);
@@ -96,7 +96,7 @@ public class PlayerAnimation {
         return new TextureRegion();
     }
 
-    public TextureRegion updateExtinguisherAnimation(){
+    TextureRegion updateExtinguisherAnimation(){
         if(extinguishTime > MAX_EXTINGUISH_TIME){
             extinguishTime = 0;
         }

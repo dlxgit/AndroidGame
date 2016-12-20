@@ -27,7 +27,7 @@ public class Enemy extends Entity {
 
     State state;
     float livingTime;
-    public float actionCooldown = 1;
+    float actionCooldown = 1;
     float attackCooldown;
     EnemyAnimation animation;
 
@@ -35,7 +35,7 @@ public class Enemy extends Entity {
 
     public Enemy(Vector2 position, Assets assets){
         moveSpeed = 3.f;
-        Texture texture = assets.manager.get(assets.enemyTextureName);
+        Texture texture = assets.manager.get(Assets.enemyTextureName);
         rectangle = new Rectangle(position.x, position.y, 27, 49);
         animation = new EnemyAnimation(texture);
         state = State.SPAWN;
@@ -106,23 +106,21 @@ public class Enemy extends Entity {
     }
 
 
-    Vector2 calculateDistance(Rectangle playerRect){
-        Vector2 distance = new Vector2( Math.abs(playerRect.x - rectangle.x),
-                Math.abs(playerRect.y - rectangle.y));
-        return distance;
+    private Vector2 calculateDistance(Rectangle playerRect){
+        return new Vector2( Math.abs(playerRect.x - rectangle.x),
+                            Math.abs(playerRect.y - rectangle.y));
     }
 
     void updateEnemyDirection(Rectangle playerRect) {
-        //calculate distance and direction
         Vector2 distance = calculateDistance(playerRect);
         if(overlaps(playerRect)){
-            if(state == state.ATTACK){
+            if(state == State.ATTACK){
                 if(getStateTime() < 0.5) {
                     state = State.ATTACK;
                 }
                 else state = State.MOVE;
             }
-            if(state == state.MOVE){
+            if(state == State.MOVE){
                 state = State.ATTACK;
             }
         }
@@ -138,7 +136,6 @@ public class Enemy extends Entity {
         }
         else
         {
-            //TODO: check left-right direction zombie sprite bug (almost)
             if ((distance.x > 3 && distance.y > 3) && (distance.x / distance.y > 0.9) && (distance.y / distance.x < 1.1))
             {
                 if (playerRect.x >= rectangle.x && playerRect.y <= rectangle.y)
@@ -167,14 +164,11 @@ public class Enemy extends Entity {
         }
     }
 
-    public boolean overlaps(Rectangle playerRect){
-        if(rectangle.overlaps(playerRect)){
-            return true;
-        }
-        return false;
+    private boolean overlaps(Rectangle playerRect){
+        return rectangle.overlaps(playerRect);
     }
 
-    public boolean isAction()
+    boolean isAction()
     {
         if(state != State.DEAD && state != State.EXPLODED && actionCooldown <= 0)
         {
@@ -184,19 +178,19 @@ public class Enemy extends Entity {
         return false;
     }
 
-    public void setActionCooldown(){
+    void setActionCooldown(){
         actionCooldown = ACTION_COOLDOWN;
     }
 
     public boolean isDeathAnimationFinished(){
-        return animation.stateTime > animation.FRAME_DURATION * animation.DEATH_FRAMES;
+        return animation.stateTime > EnemyAnimation.FRAME_DURATION * EnemyAnimation.DEATH_FRAMES;
     }
 
     public float getStateTime(){
         return animation.stateTime;
     }
 
-    static Rectangle calculateSpawnPosition(Rectangle playerRect, MapObjects solidObjects, Random rand) {
+    public static Rectangle calculateSpawnPosition(Rectangle playerRect, MapObjects solidObjects, Random rand) {
         return Entity.calculateObjectSpawnPosition(new Vector2(30,50),
                 solidObjects,
                 new Rectangle(playerRect.x - Game.ENEMY_SPAWN_RADIUS.x / 2,
@@ -206,7 +200,7 @@ public class Enemy extends Entity {
                 rand);
     }
 
-    static Enemy createRandomEnemyNearPlayer(Assets assets, Rectangle playerRect, MapObjects solidObjects, Random rand){
+    public static Enemy createRandomEnemyNearPlayer(Assets assets, Rectangle playerRect, MapObjects solidObjects, Random rand){
         Vector2 pos = calculateSpawnPosition(playerRect, solidObjects, rand).getPosition(new Vector2());
         if(rand.nextBoolean()){
             return new Enemy(pos, assets);

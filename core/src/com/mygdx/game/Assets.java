@@ -63,7 +63,7 @@ public class Assets {
         load();
     }
 
-    public void load(){
+    private void load(){
         loadTextures();
         loadAudio();
         menuMusic = manager.get("sounds/menu.ogg");
@@ -81,7 +81,7 @@ public class Assets {
         levelFinishTexture = manager.get(levelFinishName);
     }
 
-    public void loadTextures() {
+    private void loadTextures() {
         manager.setLoader(Texture.class, new TextureLoader(new InternalFileHandleResolver()));
         manager.load(heroTextureName, Texture.class);
         manager.load(enemyTextureName, Texture.class);
@@ -106,7 +106,7 @@ public class Assets {
         System.out.println("Textures are loaded.");
     }
 
-    public void loadAudio(){
+    private void loadAudio(){
         manager.setLoader(Music.class, new MusicLoader(new InternalFileHandleResolver()));;
         manager.load("sounds/level0.ogg", Music.class);
         manager.load("sounds/level1.ogg", Music.class);
