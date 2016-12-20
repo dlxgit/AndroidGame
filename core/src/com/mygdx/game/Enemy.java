@@ -66,7 +66,7 @@ public class Enemy extends Entity {
         moveRectangle();
     }
 
-    public void update(Player player, MapObjects solidObjects) {
+    public void update(Player player, MapObjects solidObjects, Assets assets) {
 
         this.livingTime += Gdx.graphics.getDeltaTime();
 
@@ -76,6 +76,7 @@ public class Enemy extends Entity {
             case SPAWN:
                 if(health <= 0) {
                     state = State.DEAD;
+                    assets.enemyExplosionSound.play();
                 }
                 if(animation.isSpawnAnimationFinished()) {
                     direction = Direction.DOWN;
@@ -102,7 +103,7 @@ public class Enemy extends Entity {
                     //PROCESS DAMAGE
                     attackCooldown = ATTACK_COOLDOWN;
                     //System.out.println("Enemy attack success");
-                    player.takeDamage(ATTACK_DAMAGE);
+                    player.takeDamage(ATTACK_DAMAGE, assets);
                 }
                 break;
             case DEAD:
@@ -110,7 +111,6 @@ public class Enemy extends Entity {
                     state = State.EXPLODED;
                 }
                 break;
-
             default:
                 break;
         }
@@ -118,7 +118,6 @@ public class Enemy extends Entity {
         if (player.state == Player.State.EXTINGUISH && player.getExtinguisherRectangle(solidObjects).overlaps(rectangle)) {
             health -= Game.FIRE_EXTINGUISHER_DAMAGE;
         }
-
         if(lastState != state){
             animation.stateTime = 0;
         }

@@ -167,17 +167,14 @@ public class Entity {
                 }
             }
             else{
-                System.out.println("pochemu ya daun");
             }
         }
-        //System.out.println("Java nais debug");
         System.out.print("");
     }
 
-
-
     static Rectangle calculateObjectSpawnPosition(Vector2 objectSize, MapObjects solidObjects, Rectangle mapSector, Random rand){
         while (true) {
+            //[1540 - 3600]y [0-3110]x
             Rectangle resultRect = new Rectangle((rand.nextInt((int) (mapSector.width / TileMap.STEP_TILE))) * TileMap.STEP_TILE + mapSector.x,
                                                 (rand.nextInt((int) (mapSector.height / TileMap.STEP_TILE))) * TileMap.STEP_TILE + mapSector.y,
                                                 objectSize.x,
@@ -195,6 +192,4 @@ public class Entity {
             }
         }
     }
-
-
 }

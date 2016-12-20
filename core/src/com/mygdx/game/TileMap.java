@@ -22,17 +22,16 @@ public class TileMap {
     public static final float SCALE = 10.f;
     OrthogonalTiledMapRenderer renderer;
     TiledMap lvl;
-    Vector<MapObject> allObjects;
-    Vector<MapObject> solidObjects;
-    MapObjects objects;
-
+//    Vector<MapObject> allObjects;
+//    Vector<MapObject> solidObjects;
+    int nLevel;
 
     public TileMap(Assets assets, OrthographicCamera camera, int level){
-        lvl = new TmxMapLoader().load("levels/level0.tmx");
+        lvl = new TmxMapLoader().load("levels/level" + String.valueOf(level) + ".tmx");
         renderer = new OrthogonalTiledMapRenderer(lvl);
         renderer.setView(camera);
         renderer.setMap(lvl);
-        allObjects = new Vector<MapObject>();
+        nLevel = level;
     }
 
     public void update(OrthographicCamera camera){

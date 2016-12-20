@@ -18,25 +18,21 @@ public class PressButton {
     enum Type{
         FIRE,
         CHANGE_SLOT,
-        ESCAPE,
-        PAUSE,
         START,
         QUIT
     }
 
-    public static final Vector2 FIRE_BUTTON_POS = new Vector2(1700, 200);
-    public static final Vector2 CHANGE_SLOT_BUTTON_POS = new Vector2(1600, 200);
-    public static final Vector2 ESCAPE_BUTTON_POS = new Vector2(1850, 1000);
+    public static final Vector2 FIRE_BUTTON_POS = new Vector2(1600, 200);
+    public static final Vector2 CHANGE_SLOT_BUTTON_POS = new Vector2(1400, 200);
 
-    public static final Vector2 PAUSE_BUTTON_POS = new Vector2(1700, 1000);
-
-    public static final Vector2 START_BUTTON_POS = new Vector2(1920 / 2 - 640 / 2, 1080 / 2 + 150);
+    public static final Vector2 START_BUTTON_POS = new Vector2(1920 / 2 - 640 / 2, 1080 / 2 + 30);
     public static final Vector2 QUIT_BUTTON_POS = new Vector2(1920 / 2 - 640 / 2, 1080 / 2 - 250);
 
 
     Texture texture;
     Sprite sprite;
     boolean isPressed;
+
 
     public PressButton(Assets assets, Type type){
         Vector2 pos = new Vector2();
@@ -51,24 +47,11 @@ public class PressButton {
                 sprite = new Sprite(changeSlotTexture);
                 pos = CHANGE_SLOT_BUTTON_POS;
                 break;
-            case ESCAPE:
-                pos = ESCAPE_BUTTON_POS;
-                Texture escapeButtonTexture = assets.manager.get(assets.escapeButtonTextureName);
-                sprite = new Sprite(escapeButtonTexture);
-                break;
-
-            case PAUSE:
-                pos = PAUSE_BUTTON_POS;
-                Texture pauseButtonTexture = assets.manager.get(assets.pauseButtonName);
-                sprite = new Sprite(pauseButtonTexture);
-                break;
-
             case START:
                 pos = START_BUTTON_POS;
                 Texture startButtonTexture = assets.manager.get(assets.startButtonName);
                 sprite = new Sprite(startButtonTexture);
                 break;
-
             case QUIT:
                 pos = QUIT_BUTTON_POS;
                 Texture quitButtonTexture = assets.manager.get(assets.quitButtonName);
@@ -113,9 +96,6 @@ public class PressButton {
             updatePressState();
         }
         else isPressed = false;
-
         //sprite.setPosition(camPos.x + pos.x - Gdx.graphics.getWidth() / 2 , camPos.y - Gdx.graphics.getHeight() +  pos.y);
-
-
     }
 }

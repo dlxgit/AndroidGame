@@ -214,10 +214,11 @@ public class Player extends Entity {
     }
 
 
-    public void takeDamage(float damage){
+    public void takeDamage(float damage, Assets assets){
         health -= damage;
         state = State.DAMAGED;
         stateTime = 0;
+        assets.takeDamageSound.play();
     }
 
     public void useMedicine(){

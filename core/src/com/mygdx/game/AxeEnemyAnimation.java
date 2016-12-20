@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 
 public class AxeEnemyAnimation {
+    public static final float FRAME_DURATION = 0.3f;
     Animation moveUpAnimation;
     Animation moveRightAnimation;
     Animation moveDownAnimation;
@@ -32,10 +33,10 @@ public class AxeEnemyAnimation {
     public AxeEnemyAnimation(Texture enemySheet) {
         System.out.println("Anim_create");
         TextureRegion[][] enemyMoveRegion = new TextureRegion(enemySheet, 0, 0, 84, 124).split(21, 31);
-        moveUpAnimation = new Animation(0.5f, enemyMoveRegion[0]);
-        moveDownAnimation = new Animation(0.5f, enemyMoveRegion[1]);
-        moveLeftAnimation = new Animation(0.5f, enemyMoveRegion[2]);
-        moveRightAnimation = new Animation(0.5f, enemyMoveRegion[3]);
+        moveUpAnimation = new Animation(FRAME_DURATION, enemyMoveRegion[0]);
+        moveDownAnimation = new Animation(FRAME_DURATION, enemyMoveRegion[1]);
+        moveLeftAnimation = new Animation(FRAME_DURATION, enemyMoveRegion[2]);
+        moveRightAnimation = new Animation(FRAME_DURATION, enemyMoveRegion[3]);
 
         TextureRegion[][] enemyAttackRegion = new TextureRegion(enemySheet, 0, 174, 112, 27).split(28, 27);
         attackTextureRegion = enemyAttackRegion[0];
@@ -43,7 +44,7 @@ public class AxeEnemyAnimation {
         //174, 28, 27
         stateTime = 0;
 
-        deathAnimation = new Animation(0.5f, new TextureRegion(enemySheet, 5, 232, 261, 38).split(29, 38)[0]);
+        deathAnimation = new Animation(FRAME_DURATION, new TextureRegion(enemySheet, 5, 232, 261, 38).split(29, 38)[0]);
 
         /*
         TextureRegion[][] attackFrames = new TextureRegion(enemySheet, 84, 124).split(enemySheet.getWidth() / 4, enemySheet.getHeight());

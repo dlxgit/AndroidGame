@@ -120,7 +120,7 @@ public class NpcAnimation {
             for(int i = 0; i < 8; i++) {
                 npcDeathAnimationSplitted[i] = new TextureRegion(npcSheet, 45 * i, 593, 53, 45);
             }
-        npcDeathAnimation = new Animation(0.5f, npcDeathAnimationSplitted);
+        npcDeathAnimation = new Animation(0.3f, npcDeathAnimationSplitted);
     }
 
     public void update(){

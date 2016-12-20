@@ -15,7 +15,7 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class Grenade extends Bullet{
-    public static final float MOVE_SPEED = 10;
+    public static final float MOVE_SPEED = 15;
     public static final float DAMAGE = 35;
     public static final Vector2 EXPLOSION_RADIUS = new Vector2(100, 100);
     float rotationAngle;
@@ -33,41 +33,23 @@ public class Grenade extends Bullet{
         DEATH_TIME = 3;
         Texture playerSheet = assets.manager.get(assets.heroTextureName);
         sprite = new Sprite(playerSheet, 462, 260, 14, 14); //grenade
-        //sprite.setOrigin(sprite.getOriginX() + sprite.getWidth() / 2, sprite.getOriginY() + sprite.getHeight() / 2);
-
-        //angle = new Vector2(playerRect.getX() - enemyRect.getX(), playerRect.getY() - enemyRect.getY()).angle();
 
         moveSpeed = 5.f;
         rotationAngle = 0;
         direction = playerDirection;
 
-
-        int angle = 0;
-        if(playerDirection == Direction.UP){
-            angle = 90;
-        }
-        else if (playerDirection == Direction.LEFT){
-            angle = 180;
-        }
-        else if (playerDirection == Direction.DOWN){
-            angle = 270;
-        }
-
         rectangle = new Rectangle(playerCenter.x +  - 16 / 2, playerCenter.y - 21 / 2, 16, 21);
-        //rectangle = enemyRect;
         startPos = new Vector2(rectangle.x, rectangle.y);
-
         isDead = false;
         livingTime = 0;
         moveSpeed = 8.f;
-
 
         TextureRegion[][] deathAnimationSplitted = new TextureRegion(playerSheet, 500, 76, 89, 396).split(89, 66);
         TextureRegion[] deathAnimationRegions = new TextureRegion[6];
         for(int i = 0; i < 6; ++i){
             deathAnimationRegions[i] = deathAnimationSplitted[i][0];
         }
-        deathAnimation = new Animation(0.5f, deathAnimationRegions);
+        deathAnimation = new Animation(0.2f, deathAnimationRegions);
     }
 
     @Override
@@ -80,15 +62,11 @@ public class Grenade extends Bullet{
                 rectangle.y -= MOVE_SPEED / 4;
                 break;
             case RIGHT:
-                rectangle.y = startPos.y + (float) (- 3 * Math.pow((livingTime - 1.8),2) + 9) * MOVE_SPEED;
+                rectangle.y = startPos.y + (float) (- 3 * Math.pow((livingTime * 2 - 1.8),2) + 9) * MOVE_SPEED;
                 rectangle.x += MOVE_SPEED / 5;
                 break;
             case LEFT:
-                /*
-                rectangle.y += (- Math.pow(-livingTime - 3,2) - 9) * MOVE_SPEED;
-                rectangle.x -= MOVE_SPEED;
-                */
-                rectangle.y = startPos.y + (float) (- 3 * Math.pow((livingTime - 1.8),2) + 9) * MOVE_SPEED;
+                rectangle.y = startPos.y + (float) (- 3 * Math.pow((livingTime * 2 - 1.8),2) + 9) * MOVE_SPEED;
                 rectangle.x -= MOVE_SPEED / 5;
                 break;
         }
@@ -99,7 +77,7 @@ public class Grenade extends Bullet{
         if(!isDead) {
             updatePosition();
             System.out.println(String.valueOf(rectangle.y) + " " + String.valueOf(startPos.y));
-            if(livingTime > 2){
+            if(livingTime > 1.65){
                 System.out.println("Grenade death");
                 die();
                 rectangle = new Rectangle(rectangle.getX() - EXPLOSION_RADIUS.x / 2,
@@ -114,7 +92,6 @@ public class Grenade extends Bullet{
         }
 
         livingTime += Gdx.graphics.getDeltaTime();
-
     }
 
     @Override
@@ -127,16 +104,5 @@ public class Grenade extends Bullet{
             System.out.println("Grenade Explosion");
             batch.draw(deathAnimation.getKeyFrame(stateTime), rectangle.x, rectangle.y);
         }
-    }
-
-    static float calculateAngle(Rectangle rect1, Rectangle rect2){
-        return new Vector2(rect1.getX() - rect2.getX(), rect1.getY() - rect2.getY()).angle();
-    }
-
-    public boolean isKillingEnemy(Rectangle enemyRect){
-        if (enemyRect.overlaps(new Rectangle(rectangle.x + rectangle.width / 2 - 100, rectangle.y + rectangle.height / 2 + 60, 200, 120))){
-            return true;
-        }
-        return false;
     }
 }

@@ -52,9 +52,7 @@ public class Loot {
     Type type;
     TextureRegion region;
     Rectangle rectangle;
-    //each item should have final ammo (declared in game or ...)
 
-    int quantity; //?? ЗАЧЕМ
 
     public Loot(Assets assets, Type type, Vector2 position){
         this.type = type;
@@ -64,12 +62,6 @@ public class Loot {
     }
 
     void update(){
-
-    }
-
-    boolean activate(){
-        //?
-        return true;
     }
 
     void render(SpriteBatch batch){
@@ -78,7 +70,7 @@ public class Loot {
     }
 
     static Rectangle calculateSpawnPosition(MapObjects solidObjects, Random rand) {
-        return Entity.calculateObjectSpawnPosition(IMAGE_SIZE, solidObjects, new Rectangle(0, 0, Game.MAP_SIZE.x, Game.MAP_SIZE.y), rand);
+        return Entity.calculateObjectSpawnPosition(IMAGE_SIZE, solidObjects, new Rectangle(0, 1540, 3110, 3600 - 1540), rand);
     }
 
     static Loot createLoot(Assets assets, MapObjects solidObjects, Random rand){

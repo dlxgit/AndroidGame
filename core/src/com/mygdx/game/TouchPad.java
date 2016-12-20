@@ -54,15 +54,15 @@ public class TouchPad implements ApplicationListener {
         //Create new TouchPad with the created style
         touchpad = new Touchpad(10, touchpadStyle);
         //setBounds(x,y,width,height)
-        touchpad.setBounds(15, 15, 200, 200);
+        touchpad.setBounds(15, 15, 320, 320);
+
 
         //Create a Stage and add TouchPad
         //Create block sprite
         blockTexture = new Texture(Gdx.files.internal("images/block.png"));
         blockSprite = new Sprite(blockTexture);
-        //Set position to centre of the screen
-        blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);
 
+        blockSprite.setPosition(Gdx.graphics.getWidth()/2-blockSprite.getWidth()/2, Gdx.graphics.getHeight()/2-blockSprite.getHeight()/2);
         blockSpeed = 5;
     }
 

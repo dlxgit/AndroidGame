@@ -29,10 +29,8 @@ public class Inventory {
     boolean isChangeAllowed = true;
 
     public Inventory(){
-        //nItem = 0;
-        nItem = 1;
+        nItem = 0;
 
-        ammo = new Integer[4];
         initializeInventory();
         cooldown = 0;
     }
@@ -75,10 +73,12 @@ public class Inventory {
     }
 
     private void initializeInventory(){
-        ammo[0] = 3;
-        ammo[1] = 3;
-        ammo[2] = 5;
-        ammo[3] = 5;
+        ammo = new Integer[]{
+                12,
+                5,
+                5,
+                1
+        };
     }
 
     public int getCurrentSlot(){

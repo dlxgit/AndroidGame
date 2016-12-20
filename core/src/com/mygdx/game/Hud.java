@@ -14,8 +14,8 @@ import com.badlogic.gdx.math.Vector2;
 public class Hud {
 
     public static final Vector2 HEALTH_BAR_BORDER_POSITION = new Vector2(50, 1000);
-    public static final Vector2 HEALTH_BAR_POSITION = new Vector2(HEALTH_BAR_BORDER_POSITION.x + 10.f,
-                                                                HEALTH_BAR_BORDER_POSITION.y + 1.f);
+    public static final Vector2 HEALTH_BAR_POSITION = new Vector2(HEALTH_BAR_BORDER_POSITION.x + 15.f,
+                                                                HEALTH_BAR_BORDER_POSITION.y + 4.f);
     public static final String ammoText = new String();
     public static final String savedNpcsText = new String();
 

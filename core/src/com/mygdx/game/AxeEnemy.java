@@ -16,7 +16,6 @@ public class AxeEnemy extends Enemy{
     AxeEnemyAnimation animation;
 
 
-
     public AxeEnemy(Vector2 position, Assets assets){
         state = State.MOVE;
         direction = Direction.DOWN;
@@ -33,7 +32,7 @@ public class AxeEnemy extends Enemy{
     }
 
     @Override
-    public void update(Player player, MapObjects solidObjects) {
+    public void update(Player player, MapObjects solidObjects, Assets assets) {
         this.livingTime += Gdx.graphics.getDeltaTime();
         System.out.println("Health: " + health);
         State lastState = state;
@@ -61,7 +60,7 @@ public class AxeEnemy extends Enemy{
                     //PROCESS DAMAGE
                     attackCooldown = ATTACK_COOLDOWN;
                     //System.out.println("Enemy attack success");
-                    player.takeDamage(ATTACK_DAMAGE);
+                    player.takeDamage(ATTACK_DAMAGE, assets);
                 }
                 break;
             case DEAD:

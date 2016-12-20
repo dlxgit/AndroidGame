@@ -15,11 +15,6 @@ import com.badlogic.gdx.math.Vector2;
  */
 
 public class Bullet extends Entity {
-    enum State{
-        INIT,
-        MOVE,
-        EXPLODE
-    }
     enum Target{
         PLAYER,
         ENEMY
@@ -39,6 +34,7 @@ public class Bullet extends Entity {
     Target target;
 
     Bullet(){
+
     };
 
     Bullet(Assets assets, Vector2 playerCenter, Direction dir){
@@ -50,7 +46,7 @@ public class Bullet extends Entity {
 
         target = Target.ENEMY;
         attackDamage = 100;
-        moveSpeed = 5.f;
+        moveSpeed = 15.f;
         //this.rotationAngle = rotationAngle;
         direction = dir;
 
@@ -60,7 +56,6 @@ public class Bullet extends Entity {
 
         livingTime = 0;
 
-        moveSpeed = 8.f;
         isCollision = false;
     }
 
